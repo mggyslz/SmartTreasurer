@@ -96,6 +96,7 @@
             <div class="modal-content card">
                 <span class="close" onclick="hideAddStudentModal()">×</span>
                 <h2><i class="fas fa-user-plus"></i> Add New Student</h2>
+                <button onclick="showBulkAddModal()" class="btn btn-secondary"><i class="fas fa-users"></i> Bulk Add by Section</button>
                 <form id="studentForm" class="modal-form">
                     <div class="form-group">
                         <label for="firstName"><i class="fas fa-user"></i> First Name:</label>
@@ -122,6 +123,27 @@
                     </div>
                      <!-- Payment Date is auto-set on marking paid, hidden here -->
                     <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-plus-circle"></i> Add Student</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="bulkAddModal" class="modal">
+            <div class="modal-content card">
+                <span class="close" onclick="hideBulkAddModal()">×</span>
+                <h2><i class="fas fa-users"></i> Bulk Add Students by Course</h2>
+                <form id="bulkAddForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="bulkSection"><i class="fas fa-users-rectangle"></i> Section:</label>
+                        <input type="text" id="bulkSection" required placeholder="e.g., BSIT-2B">
+                    </div>
+                    <div class="form-group">
+                        <label for="studentNames"><i class="fas fa-list-ul"></i> Student Names (First Last per
+                            line):</label>
+                        <textarea id="studentNames" rows="6" placeholder="e.g.,\nJuan Dela Cruz\nMaria Santos" required
+                            style="width: 100%; padding: 10px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-plus-circle"></i> Add
+                        Students</button>
                 </form>
             </div>
         </div>

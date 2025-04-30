@@ -53,12 +53,19 @@ document.addEventListener('DOMContentLoaded', () => {
         window.deleteAccount = deleteAccount;
         window.showAddStudentModal = showAddStudentModal;
         window.hideAddStudentModal = hideAddStudentModal;
-        window.importFromExcel = importFromExcel; // Make sure this is accessible
+        window.importFromExcel = handleFileImport;
         window.exportToExcel = exportToExcel;
         window.showEditForm = showEditForm;
         window.hideEditForm = hideEditForm;
         window.togglePaymentStatus = togglePaymentStatus;
         window.deleteStudent = deleteStudent;
+        
+        document.getElementById('bulkAddForm').addEventListener('submit', handleBulkAdd);
+        window.showBulkAddModal = () => document.getElementById('bulkAddModal').style.display = 'block';
+        window.hideBulkAddModal = () => {
+            document.getElementById('bulkAddModal').style.display = 'none';
+            document.getElementById('bulkAddForm').reset();
+        };
     }
 
     // --- Theme Handling ---
@@ -239,6 +246,38 @@ document.addEventListener('DOMContentLoaded', () => {
         students.push(student);
         updateDisplay();
         hideAddStudentModal(); // Resets form inside
+    }
+
+    function handleBulkAdd(e) {
+        e.preventDefault();
+        const section = document.getElementById('bulkSection').value.trim().toUpperCase();
+        const namesRaw = document.getElementById('studentNames').value.trim();
+        const lines = namesRaw.split('\n');
+
+        const newStudents = lines.map(line => {
+            const parts = line.trim().split(' ');
+            const firstName = parts.slice(0, -1).join(' ');
+            const lastName = parts.slice(-1).join('');
+            return {
+                id: Date.now().toString() + Math.random(),
+                firstName,
+                lastName,
+                section,
+                amount: 0,
+                isPaid: false,
+                paymentDate: null
+            };
+        }).filter(s => s.firstName && s.lastName); // remove invalid
+
+        if (newStudents.length === 0) {
+            alert("No valid student names found.");
+            return;
+        }
+
+        students = students.concat(newStudents);
+        updateDisplay();
+        hideBulkAddModal();
+        showFeedback(`${newStudents.length} students added to section ${section}.`);
     }
 
     function handleEditStudent(e) {
@@ -680,6 +719,62 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         reader.readAsArrayBuffer(file);
+    }
+
+    function importFromCSV(file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const lines = e.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+            let newStudents = [];
+    
+            lines.forEach((line, idx) => {
+                const parts = line.split(',').map(p => p.trim());
+                if (parts.length < 3) return;
+    
+                const firstName = parts[0];
+                const lastName = parts[1];
+                const section = parts[2].toUpperCase();
+    
+                if (firstName && lastName && section) {
+                    newStudents.push({
+                        id: Date.now().toString() + Math.random(),
+                        firstName,
+                        lastName,
+                        section,
+                        amount: 0,
+                        isPaid: false,
+                        paymentDate: null
+                    });
+                }
+            });
+    
+            if (newStudents.length > 0) {
+                if (students.length === 0 || confirm("CSV import successful. Replace existing data? Cancel = append.")) {
+                    students = newStudents;
+                } else {
+                    students = students.concat(newStudents);
+                }
+                updateDisplay();
+                showFeedback(`${newStudents.length} students imported from CSV.`);
+            } else {
+                alert("No valid student data found in the CSV file.");
+            }
+    
+            document.getElementById('excelFile').value = ''; // Reset file input
+        };
+        reader.readAsText(file);
+    }
+    
+    function handleFileImport(input) {
+        const file = input.files[0];
+        if (!file) return;
+    
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (ext === 'csv') {
+            importFromCSV(file);
+        } else {
+            importFromExcel(input);
+        }
     }
 
     function exportToExcel() {

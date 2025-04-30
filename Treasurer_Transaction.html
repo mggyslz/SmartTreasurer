@@ -5,38 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartTreasurer</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Ensure Font Awesome loads -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Opening Authentication Screen -->
     <div class="opening-screen" id="openingScreen">
         <div class="opening-content">
-            <div class="opening-icon">💰</div>
+            <div class="opening-icon"><i class="fas fa-sack-dollar fa-bounce"></i></div>
             <h1><i class="fas fa-university"></i> Welcome to SmartTreasurer</h1>
-            <p>For Managing student payments efficiently and effectively </p>
+            <p>Efficiently manage student payments.</p>
 
             <div class="auth-toggle">
                 <button class="toggle-btn active" onclick="showLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
                 <button class="toggle-btn" onclick="showSignup()"><i class="fas fa-user-plus"></i> Sign Up</button>
             </div>
 
+            <!-- Login Form -->
             <div class="login-form" id="loginForm">
-                <input type="text" id="loginUsername" placeholder="Username" class="auth-input">
-                <input type="password" id="loginPassword" placeholder="Password" class="auth-input">
-                <p id="loginError" class="error-message" style="display: none; color: red;"><i class="fas fa-exclamation-circle"></i> Incorrect credentials</p>
+                <div class="form-group">
+                     <label for="loginUsername"><i class="fas fa-user"></i> Username</label>
+                     <input type="text" id="loginUsername" placeholder="Enter your username" class="auth-input">
+                </div>
+                 <div class="form-group">
+                     <label for="loginPassword"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" class="auth-input">
+                 </div>
+                <p id="loginError" class="error-message" style="display: none;"><i class="fas fa-exclamation-circle"></i> Incorrect credentials. Please try again.</p>
                 <button class="start-btn" onclick="login()"><i class="fas fa-sign-in-alt"></i> Login</button>
                 <button class="delete-btn" onclick="deleteAccount()"><i class="fas fa-trash-alt"></i> Delete Account</button>
             </div>
 
+            <!-- Signup Form -->
             <div class="signup-form" id="signupForm" style="display: none;">
-                <input type="text" id="signupUsername" placeholder="Choose Username" class="auth-input">
-                <input type="password" id="signupPassword" placeholder="Choose Password" class="auth-input">
-                <input type="password" id="confirmPassword" placeholder="Confirm Password" class="auth-input">
-                <p id="signupError" class="error-message" style="display: none; color: red;"><i class="fas fa-exclamation-circle"></i> Passwords don't match</p>
+                 <div class="form-group">
+                     <label for="signupUsername"><i class="fas fa-user-check"></i> Username</label>
+                    <input type="text" id="signupUsername" placeholder="Choose a username" class="auth-input">
+                 </div>
+                 <div class="form-group">
+                     <label for="signupPassword"><i class="fas fa-key"></i> Password</label>
+                    <input type="password" id="signupPassword" placeholder="Choose a password" class="auth-input">
+                 </div>
+                 <div class="form-group">
+                     <label for="confirmPassword"><i class="fas fa-check-double"></i> Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm your password" class="auth-input">
+                 </div>
+                <p id="signupError" class="error-message" style="display: none;"><i class="fas fa-exclamation-triangle"></i> Error message here.</p>
                 <button class="start-btn" onclick="signup()"><i class="fas fa-user-plus"></i> Sign Up</button>
             </div>
         </div>
     </div>
 
+    <!-- Theme Switch -->
     <div class="theme-switch">
         <span class="theme-label" id="themeLabel"><i class="fas fa-sun"></i> Light Mode</span>
         <label class="switch">
@@ -45,64 +65,73 @@
         </label>
     </div>
 
+    <!-- Main Application Container -->
     <div class="container">
-        <h1><i class="fas fa-university"></i> SmartTreasurer</h1>
+        <header class="app-header">
+             <h1><i class="fas fa-university"></i> SmartTreasurer Dashboard</h1>
+        </header>
 
-        <div class="file-input">
-            <label for="excelFile" class="btn"><i class="fas fa-file-upload"></i> Choose File</label>
+        <!-- File Operations -->
+        <div class="file-operations">
+            <label for="excelFile" class="btn btn-secondary"><i class="fas fa-file-upload"></i> Import from Excel</label>
             <input type="file" id="excelFile" accept=".xlsx" onchange="importFromExcel(this)" style="display: none;">
-            <button onclick="exportToExcel()" class="btn"><i class="fas fa-file-export"></i> Export to Excel</button>
+            <button onclick="exportToExcel()" class="btn btn-secondary"><i class="fas fa-file-export"></i> Export to Excel</button>
+            <button onclick="showAddStudentModal()" class="btn btn-primary"><i class="fas fa-user-plus"></i> Add New Student</button>
         </div>
 
-        <div class="summary-box">
-            <h2><i class="fas fa-chart-pie"></i> Summary</h2>
-            <p><i class="fas fa-money-bill-wave"></i> Total Amount: ₱<span id="totalAmount">0</span></p>
-            <p><i class="fas fa-users"></i> Total Students: <span id="totalStudents">0</span></p>
-            <p><i class="fas fa-check-circle"></i> Total Paid: <span id="totalPaid">0</span></p>
-            <p><i class="fas fa-times-circle"></i> Total Unpaid: <span id="totalUnpaid">0</span></p>
+        <!-- Summary Section -->
+        <div class="summary-box card">
+            <h2><i class="fas fa-chart-pie"></i> Overall Summary</h2>
+            <div class="summary-grid">
+                <p><i class="fas fa-money-bill-wave"></i> Total Amount: <strong>₱<span id="totalAmount">0</span></strong></p>
+                <p><i class="fas fa-users"></i> Total Students: <strong id="totalStudents">0</strong></p>
+                <p><i class="fas fa-check-circle status-paid"></i> Total Paid: <strong id="totalPaid">0</strong></p>
+                <p><i class="fas fa-times-circle status-unpaid"></i> Total Unpaid: <strong id="totalUnpaid">0</strong></p>
+            </div>
         </div>
 
-        <button onclick="showAddStudentModal()" class="btn"><i class="fas fa-user-plus"></i> Add New Student</button>
 
+        <!-- Add Student Modal -->
         <div id="addStudentModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="hideAddStudentModal()">&times;</span>
+            <div class="modal-content card">
+                <span class="close" onclick="hideAddStudentModal()">×</span>
                 <h2><i class="fas fa-user-plus"></i> Add New Student</h2>
-                <form id="studentForm" class="modern-form">
+                <form id="studentForm" class="modal-form">
                     <div class="form-group">
                         <label for="firstName"><i class="fas fa-user"></i> First Name:</label>
-                        <input type="text" id="firstName" required placeholder="Enter first name">
+                        <input type="text" id="firstName" required placeholder="e.g., Juan">
                     </div>
                     <div class="form-group">
                         <label for="lastName"><i class="fas fa-user"></i> Last Name:</label>
-                        <input type="text" id="lastName" required placeholder="Enter last name">
+                        <input type="text" id="lastName" required placeholder="e.g., Dela Cruz">
                     </div>
                     <div class="form-group">
-                        <label for="section"><i class="fas fa-users"></i> Section:</label>
-                        <input type="text" id="section" required placeholder="Enter section">
+                        <label for="section"><i class="fas fa-users-rectangle"></i> Section:</label>
+                        <input type="text" id="section" required placeholder="e.g., BSCS-3A">
                     </div>
                     <div class="form-group">
-                        <label for="amount"><i class="fas fa-coins"></i> Amount:</label>
-                        <input type="number" id="amount" required placeholder="Enter amount">
+                        <label for="amount"><i class="fas fa-coins"></i> Amount (₱):</label>
+                        <input type="number" id="amount" required placeholder="e.g., 100" step="0.01" min="0">
                     </div>
                     <div class="form-group">
-                        <label for="isPaid"><i class="fas fa-money-bill-wave"></i> Payment Status:</label>
+                        <label for="isPaid"><i class="fas fa-cash-register"></i> Payment Status:</label>
                         <select id="isPaid" class="modern-select">
                             <option value="false">⚠️ Unpaid</option>
                             <option value="true">✅ Paid</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="paymentDate"><i class="fas fa-calendar"></i> Payment Date:</label>
-                        <input type="date" id="paymentDate" class="modern-input">
-                    </div>
-                    <button type="submit" class="btn"><i class="fas fa-plus-circle"></i> Add Student</button>
+                     <!-- Payment Date is auto-set on marking paid, hidden here -->
+                    <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-plus-circle"></i> Add Student</button>
                 </form>
             </div>
         </div>
 
-        <div id="editForm" class="edit-form">
-            <h2><i class="fas fa-edit"></i> Edit Student</h2>
+        <!-- Edit Student Form (Inline within container) -->
+        <div id="editForm" class="edit-form card" style="display: none;">
+             <div class="edit-form-header">
+                <h2><i class="fas fa-edit"></i> Edit Student</h2>
+                <button type="button" class="btn-close-inline" onclick="hideEditForm()"><i class="fas fa-times"></i></button>
+             </div>
             <form id="studentEditForm">
                 <input type="hidden" id="editIndex">
                 <div class="form-group">
@@ -114,53 +143,65 @@
                     <input type="text" id="editLastName" required>
                 </div>
                 <div class="form-group">
-                    <label for="editSection"><i class="fas fa-users"></i> Section:</label>
+                    <label for="editSection"><i class="fas fa-users-rectangle"></i> Section:</label>
                     <input type="text" id="editSection" required>
                 </div>
                 <div class="form-group">
-                    <label for="editAmount"><i class="fas fa-coins"></i> Amount:</label>
-                    <input type="number" id="editAmount" required>
+                    <label for="editAmount"><i class="fas fa-coins"></i> Amount (₱):</label>
+                    <input type="number" id="editAmount" required step="0.01" min="0">
                 </div>
                 <div class="form-group">
-                    <label for="editIsPaid"><i class="fas fa-money-bill-wave"></i> Payment Status:</label>
-                    <select id="editIsPaid">
-                        <option value="false">Unpaid</option>
-                        <option value="true">Paid</option>
+                    <label for="editIsPaid"><i class="fas fa-cash-register"></i> Payment Status:</label>
+                    <select id="editIsPaid" class="modern-select">
+                        <option value="false">⚠️ Unpaid</option>
+                        <option value="true">✅ Paid</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="editPaymentDate"><i class="fas fa-calendar"></i> Payment Date:</label>
+                    <label for="editPaymentDate"><i class="fas fa-calendar-alt"></i> Payment Date:</label>
                     <input type="date" id="editPaymentDate" class="modern-input">
+                    <small>Leave blank to auto-set today's date if marking as Paid.</small>
                 </div>
-                <button type="submit" class="btn"><i class="fas fa-save"></i> Save Changes</button>
-                <button type="button" class="btn" onclick="hideEditForm()"><i class="fas fa-times"></i> Cancel</button>
+                <div class="edit-form-actions">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideEditForm()"><i class="fas fa-times"></i> Cancel</button>
+                </div>
             </form>
         </div>
 
-        <h2><i class="fas fa-list"></i> Student Payments</h2>
-
+        <!-- Section for Student Lists -->
+        <h2 class="section-title"><i class="fas fa-list-ul"></i> Student Payments by Section</h2>
         <div id="sectionLists">
-
+            <!-- Student tables will be generated here by JS -->
+             <p id="noStudentsMessage" style="text-align: center; padding: 20px; color: var(--text-muted);">No student data available. Add students or import from Excel.</p>
         </div>
 
+        <!-- Section Summary Table -->
         <h2 class="section-title"><i class="fas fa-chart-bar"></i> Section Summary</h2>
-        <div class="table-responsive">
+        <div class="table-responsive card">
             <table class="modern-table">
                 <thead>
                     <tr>
-                        <th><i class="fas fa-users"></i> Section</th>
-                        <th><i class="fas fa-user-friends"></i> Total Students</th>
-                        <th><i class="fas fa-coins"></i> Total Amount</th>
-                        <th><i class="fas fa-check-circle"></i> Paid Students</th>
-                        <th><i class="fas fa-exclamation-circle"></i> Unpaid Students</th>
-                        <th><i class="fas fa-calendar"></i> Latest Payment</th>
+                        <th><i class="fas fa-users-rectangle"></i> Section</th>
+                        <th><i class="fas fa-user-friends"></i> Students</th>
+                        <th><i class="fas fa-coins"></i> Total Amt.</th>
+                        <th><i class="fas fa-check-circle"></i> Paid</th>
+                        <th><i class="fas fa-exclamation-circle"></i> Unpaid</th>
+                        <th><i class="fas fa-calendar-check"></i> Latest Payment</th>
                     </tr>
                 </thead>
-                <tbody id="sectionSummary" class="animated">
+                <tbody id="sectionSummary">
+                     <!-- Section summary rows will be generated here -->
+                     <tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">No section summary available.</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
+
+    <!-- Footer (Optional) -->
+    <footer class="app-footer">
+        <p>© 2023 SmartTreasurer. All rights reserved.</p>
+    </footer>
 
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="script.js"></script>

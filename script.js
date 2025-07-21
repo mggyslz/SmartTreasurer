@@ -38,6 +38,28 @@ document.addEventListener('DOMContentLoaded', () => {
         studentForm.addEventListener('submit', handleAddStudent);
         studentEditForm.addEventListener('submit', handleEditStudent);
 
+        // Add these new listeners for sidebar functionality
+        document.addEventListener('click', (e) => {
+            // Close sidebar when clicking outside
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            
+            if (sidebar.classList.contains('open') && 
+                !sidebar.contains(e.target) && 
+                e.target !== sidebarToggle) {
+                toggleSidebar();
+            }
+        });
+
+        // Close sidebar when a menu item is clicked (for mobile)
+        document.querySelectorAll('.sidebar-menu a').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
         // Close modal on outside click
         window.onclick = (event) => {
             if (event.target == addStudentModal) {
@@ -59,6 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
         window.hideEditForm = hideEditForm;
         window.togglePaymentStatus = togglePaymentStatus;
         window.deleteStudent = deleteStudent;
+        window.toggleSidebar = toggleSidebar;
+        window.toggleSettings = toggleSettings;
+        window.toggleThemeFromSidebar = toggleThemeFromSidebar;
+        window.deleteSectionPrompt = deleteSectionPrompt;
+        window.deleteSection = deleteSection;
+        window.toggleSection = toggleSection;
         
         document.getElementById('bulkAddForm').addEventListener('submit', handleBulkAdd);
         window.showBulkAddModal = () => document.getElementById('bulkAddModal').style.display = 'block';
@@ -230,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const student = {
             id: Date.now().toString(), // Simple unique ID
             firstName: document.getElementById('firstName').value.trim(),
+            middleInitial: document.getElementById('middleInitial').value.trim().toUpperCase(),
             lastName: document.getElementById('lastName').value.trim(),
             section: document.getElementById('section').value.trim().toUpperCase(), // Standardize section format
             amount: amount,
@@ -255,22 +284,84 @@ document.addEventListener('DOMContentLoaded', () => {
         const lines = namesRaw.split('\n');
 
         const newStudents = lines.map(line => {
-            const parts = line.trim().split(' ');
-            const firstName = parts.slice(0, -1).join(' ');
-            const lastName = parts.slice(-1).join('');
-            return {
-                id: Date.now().toString() + Math.random(),
-                firstName,
-                lastName,
-                section,
-                amount: 0,
-                isPaid: false,
-                paymentDate: null
-            };
-        }).filter(s => s.firstName && s.lastName); // remove invalid
+            const trimmedLine = line.trim();
+            if (!trimmedLine) return null;
+
+            // Try to parse as "Last, First Middle" format first
+            if (trimmedLine.includes(',')) {
+                const [lastNamePart, firstNamePart] = trimmedLine.split(',').map(part => part.trim());
+                const firstNameParts = firstNamePart ? firstNamePart.split(' ') : [];
+                
+                // If we have multiple parts after comma, last one might be middle initial
+                let firstName, middleInitial = '';
+                if (firstNameParts.length > 1) {
+                    const possibleMiddle = firstNameParts[firstNameParts.length - 1];
+                    if (possibleMiddle.length === 1 || possibleMiddle.endsWith('.')) {
+                        // Treat as middle initial
+                        middleInitial = possibleMiddle.charAt(0).toUpperCase();
+                        firstName = firstNameParts.slice(0, -1).join(' ');
+                    } else {
+                        // All parts are first name (compound first name)
+                        firstName = firstNameParts.join(' ');
+                    }
+                } else {
+                    firstName = firstNameParts.join(' ');
+                }
+
+                if (!firstName || !lastNamePart) return null;
+
+                return {
+                    id: Date.now().toString() + Math.random(),
+                    firstName,
+                    middleInitial,
+                    lastName: lastNamePart,
+                    section,
+                    amount: 0,
+                    isPaid: false,
+                    paymentDate: null
+                };
+            } else {
+                // Try to parse as "First Middle Last" format
+                const parts = trimmedLine.split(' ').filter(p => p.trim());
+                if (parts.length < 2) return null;
+
+                let firstName, middleInitial = '', lastName;
+                if (parts.length === 2) {
+                    // Simple "First Last"
+                    firstName = parts[0];
+                    lastName = parts[1];
+                } else {
+                    // Check if last part is a middle initial
+                    const possibleMiddle = parts[parts.length - 2];
+                    if (possibleMiddle.length === 1 || possibleMiddle.endsWith('.')) {
+                        // Format: First M. Last
+                        firstName = parts.slice(0, -2).join(' ');
+                        middleInitial = possibleMiddle.charAt(0).toUpperCase();
+                        lastName = parts[parts.length - 1];
+                    } else {
+                        // Format: First Middle Last (compound first name)
+                        firstName = parts.slice(0, -1).join(' ');
+                        lastName = parts[parts.length - 1];
+                    }
+                }
+
+                if (!firstName || !lastName) return null;
+
+                return {
+                    id: Date.now().toString() + Math.random(),
+                    firstName,
+                    middleInitial,
+                    lastName,
+                    section,
+                    amount: 0,
+                    isPaid: false,
+                    paymentDate: null
+                };
+            }
+        }).filter(s => s !== null);
 
         if (newStudents.length === 0) {
-            alert("No valid student names found.");
+            alert("No valid student names found. Please use format: LastName, FirstName MiddleInitial");
             return;
         }
 
@@ -352,6 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('editAmount').value = student.amount;
         document.getElementById('editIsPaid').value = student.isPaid.toString();
         document.getElementById('editPaymentDate').value = student.paymentDate || ''; // Set to empty string if null
+        document.getElementById('editMiddleInitial').value = student.middleInitial || '';
 
         editFormDiv.style.display = 'block';
         editFormDiv.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll to the form
@@ -427,63 +519,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateStudentList() {
-        sectionLists.innerHTML = ''; // Clear existing list
+        sectionLists.innerHTML = '';
         const groupedStudents = groupStudentsBySection();
-        const sortedSections = Object.keys(groupedStudents).sort(); // Sort sections alphabetically
+        const sortedSections = Object.keys(groupedStudents).sort();
 
-        if (sortedSections.length === 0) return; // Exit if no students
+        if (sortedSections.length === 0) return;
 
         sortedSections.forEach(section => {
             const sectionStudents = groupedStudents[section];
             const sectionDiv = document.createElement('div');
-            sectionDiv.className = 'card section-card'; // Add card styling
+            sectionDiv.className = 'card section-card';
 
-            // Sort students within section (e.g., by last name)
+            // Sort students by last name
             sectionStudents.sort((a, b) => a.lastName.localeCompare(b.lastName));
 
             sectionDiv.innerHTML = `
-                <h3 class="section-header"><i class="fas fa-users-rectangle"></i> Section: ${section}</h3>
-                <div class="table-responsive">
-                    <table class="modern-table">
-                        <thead>
-                            <tr>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Amount (₱)</th>
-                                <th>Status</th>
-                                <th>Payment Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${sectionStudents.map(student => {
-                                // Find the original index in the main 'students' array
-                                const originalIndex = students.findIndex(s => s.id === student.id);
-                                return `
+                <h3 class="section-header" onclick="toggleSection(this)"><i class="fas fa-users-rectangle"></i> Section: ${section}</h3>
+                <div class="section-content">
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
                                 <tr>
-                                    <td>${student.firstName}</td>
-                                    <td>${student.lastName}</td>
-                                    <td>${student.amount.toFixed(2)}</td>
-                                    <td class="status-${student.isPaid ? 'paid' : 'unpaid'}">
-                                        <i class="fas ${student.isPaid ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-                                        ${student.isPaid ? 'Paid' : 'Unpaid'}
-                                    </td>
-                                    <td>${student.paymentDate || 'N/A'}</td>
-                                    <td>
-                                        <button onclick="togglePaymentStatus(${originalIndex})" class="btn btn-secondary btn-sm" title="${student.isPaid ? 'Mark as Unpaid' : 'Mark as Paid'}">
-                                            <i class="fas ${student.isPaid ? 'fa-times' : 'fa-check'}"></i>
-                                        </button>
-                                        <button onclick="showEditForm(${originalIndex})" class="btn btn-primary btn-sm" title="Edit Student">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button onclick="deleteStudent(${originalIndex})" class="btn btn-danger btn-sm" title="Delete Student">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
+                                    <th>Name</th>
+                                    <th>Amount (₱)</th>
+                                    <th>Status</th>
+                                    <th>Payment Date</th>
+                                    <th>Actions</th>
                                 </tr>
-                            `}).join('')}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                ${sectionStudents.map(student => {
+                                    const originalIndex = students.findIndex(s => s.id === student.id);
+                                    return `
+                                    <tr>
+                                        <td>${student.lastName}, ${student.firstName} ${student.middleInitial || ''}</td>
+                                        <td>${student.amount.toFixed(2)}</td>
+                                        <td class="status-${student.isPaid ? 'paid' : 'unpaid'}">
+                                            <i class="fas ${student.isPaid ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                                            ${student.isPaid ? 'Paid' : 'Unpaid'}
+                                        </td>
+                                        <td>${student.paymentDate || 'N/A'}</td>
+                                        <td>
+                                            <button onclick="togglePaymentStatus(${originalIndex})" class="btn btn-secondary btn-sm" title="${student.isPaid ? 'Mark as Unpaid' : 'Mark as Paid'}">
+                                                <i class="fas ${student.isPaid ? 'fa-times' : 'fa-check'}"></i>
+                                            </button>
+                                            <button onclick="showEditForm(${originalIndex})" class="btn btn-primary btn-sm" title="Edit Student">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button onclick="deleteStudent(${originalIndex})" class="btn btn-danger btn-sm" title="Delete Student">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    `}).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             `;
             sectionLists.appendChild(sectionDiv);
@@ -572,7 +663,83 @@ document.addEventListener('DOMContentLoaded', () => {
         alert(message); // Use alert as a basic feedback mechanism
      }
 
+    // Sidebar functions
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('open');
+        document.body.classList.toggle('sidebar-open');
+        
+        // Adjust theme switch position
+        const themeSwitch = document.querySelector('.theme-switch');
+        themeSwitch.style.top = sidebar.classList.contains('open') ? '70px' : '15px';
+    }
 
+    function toggleSettings() {
+        const submenu = document.getElementById('settingsSubmenu');
+        const chevron = document.getElementById('settingsChevron');
+        
+        submenu.classList.toggle('open');
+        chevron.classList.toggle('fa-chevron-down');
+        chevron.classList.toggle('fa-chevron-up');
+    }
+
+    function toggleThemeFromSidebar() {
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.checked = !themeToggle.checked;
+        handleThemeToggle(); // This will trigger your existing theme change logic
+    }
+
+    function deleteSectionPrompt() {
+        if (!currentUser || students.length === 0) {
+            alert("No sections available to delete.");
+            return;
+        }
+
+        const sections = [...new Set(students.map(s => s.section))].sort();
+        
+        const sectionToDelete = prompt(`Enter the section name to delete (Available sections: ${sections.join(', ')}`);
+        
+        if (!sectionToDelete) return; // User cancelled
+        
+        if (!sections.includes(sectionToDelete.trim().toUpperCase())) {
+            alert(`Section "${sectionToDelete}" not found. Available sections: ${sections.join(', ')}`);
+            return;
+        }
+
+        if (confirm(`Are you sure you want to delete ALL students in section "${sectionToDelete}"? This cannot be undone!`)) {
+            deleteSection(sectionToDelete.trim().toUpperCase());
+        }
+    }
+
+    // Add this helper function
+    function deleteSection(sectionName) {
+        students = students.filter(student => student.section !== sectionName);
+        updateDisplay();
+        showFeedback(`Section "${sectionName}" and all its students have been deleted.`);
+    }
+
+    function toggleSection(header) {
+        header.classList.toggle('collapsed');
+        const content = header.nextElementSibling;
+        content.classList.toggle('collapsed');
+        
+        // If we're expanding, set the height to the actual content height first
+        if (!content.classList.contains('collapsed')) {
+            content.style.maxHeight = 'none';
+            const height = content.scrollHeight;
+            content.style.maxHeight = '0';
+            // Trigger reflow
+            void content.offsetHeight;
+            content.style.maxHeight = height + 'px';
+            
+            // After transition completes, remove the fixed height
+            setTimeout(() => {
+                if (!content.classList.contains('collapsed')) {
+                    content.style.maxHeight = 'none';
+                }
+            }, 300);
+        }
+    }
     // --- Excel Import/Export ---
     function importFromExcel(input) {
         const file = input.files[0];
@@ -583,104 +750,124 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onload = function(e) {
             try {
                 const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array', cellDates: true }); // Try to parse dates
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
 
                 let importedStudents = [];
                 let importErrors = [];
 
                 workbook.SheetNames.forEach(sheetName => {
-                    if (sheetName.toLowerCase() === 'summary') return; // Skip summary sheet
+                    if (sheetName.toLowerCase() === 'summary') return;
 
                     const worksheet = workbook.Sheets[sheetName];
-                    // Convert to JSON with header row detection, but we'll process row by row
                     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null });
 
-                    let currentSection = sheetName; // Use sheet name as default section
+                    let currentSection = sheetName;
                     let inPaidBlock = false;
                     let inUnpaidBlock = false;
                     let headerRowFound = false;
-                    const expectedHeaders = ["first name", "last name", "amount", "payment status", "payment date"];
 
                     jsonData.forEach((row, rowIndex) => {
-                        if (!row || row.every(cell => cell === null || String(cell).trim() === '')) return; // Skip empty rows
+                        if (!row || row.every(cell => cell === null || String(cell).trim() === '')) return;
 
-                         // Detect section headers like "Section: BSCS-3A"
-                         if (typeof row[0] === 'string' && row[0].toLowerCase().startsWith('section:')) {
-                             currentSection = row[0].substring(8).trim().toUpperCase();
-                             inPaidBlock = false; // Reset blocks when section changes
-                             inUnpaidBlock = false;
-                             headerRowFound = false;
-                             return; // Move to next row
-                         }
-
-                         // Detect block headers
-                         if (typeof row[0] === 'string') {
-                              if (row[0].toUpperCase() === 'PAID STUDENTS') {
-                                  inPaidBlock = true;
-                                  inUnpaidBlock = false;
-                                  headerRowFound = false; // Expect headers after this
-                                  return;
-                              }
-                              if (row[0].toUpperCase() === 'UNPAID STUDENTS') {
-                                   inUnpaidBlock = true;
-                                   inPaidBlock = false;
-                                   headerRowFound = false; // Expect headers after this
-                                   return;
-                              }
-                         }
-
-
-                        // Detect Header Row within a block (flexible check)
-                        if ((inPaidBlock || inUnpaidBlock) && !headerRowFound) {
-                            const rowHeaders = row.map(h => String(h || '').trim().toLowerCase());
-                            // Check if *most* headers are present
-                            const matchedHeaders = expectedHeaders.filter(eh => rowHeaders.includes(eh));
-                             if (matchedHeaders.length >= 3) { // Require at least 3 matching headers
-                                 headerRowFound = true;
-                                 return; // Skip the header row itself
-                             }
+                        if (typeof row[0] === 'string' && row[0].toLowerCase().startsWith('section:')) {
+                            currentSection = row[0].substring(8).trim().toUpperCase();
+                            inPaidBlock = false;
+                            inUnpaidBlock = false;
+                            headerRowFound = false;
+                            return;
                         }
 
-                        // Process data row if we are inside a block AND have found headers
-                        if ((inPaidBlock || inUnpaidBlock) && headerRowFound && row.length >= 3) {
-                             // Basic validation: Need at least first name, last name, amount
-                             const firstName = String(row[0] || '').trim();
-                             const lastName = String(row[1] || '').trim();
-                             let amountStr = String(row[2] || '0').replace(/[^0-9.-]+/g,""); // Clean currency symbols etc.
-                             const amount = parseFloat(amountStr);
-                             const paymentDateRaw = row[4]; // Get potential date
+                        if (typeof row[0] === 'string') {
+                            if (row[0].toUpperCase() === 'PAID STUDENTS') {
+                                inPaidBlock = true;
+                                inUnpaidBlock = false;
+                                headerRowFound = false;
+                                return;
+                            }
+                            if (row[0].toUpperCase() === 'UNPAID STUDENTS') {
+                                inUnpaidBlock = true;
+                                inPaidBlock = false;
+                                headerRowFound = false;
+                                return;
+                            }
+                        }
 
-                             if (firstName && lastName && !isNaN(amount) && amount >= 0) {
-                                 let paymentDate = null;
-                                 if (inPaidBlock && paymentDateRaw) {
-                                     if (paymentDateRaw instanceof Date && !isNaN(paymentDateRaw)) {
-                                         // Adjust for potential timezone offset if XLSX reads as UTC noon/midnight
-                                         const adjustedDate = new Date(paymentDateRaw.getTime() - (paymentDateRaw.getTimezoneOffset() * 60000));
-                                         paymentDate = adjustedDate.toISOString().split('T')[0];
-                                     } else if (typeof paymentDateRaw === 'string' && !isNaN(new Date(paymentDateRaw))) {
-                                          paymentDate = new Date(paymentDateRaw).toISOString().split('T')[0];
-                                     } else {
-                                          // If date is invalid but should be paid, maybe default to today or null? Let's default to null and log.
-                                          console.warn(`Invalid payment date format for ${firstName} ${lastName} in section ${currentSection}. Setting to null.`);
-                                     }
-                                 } else if (inPaidBlock && !paymentDateRaw) {
-                                     // Paid but no date provided - default to today? Or null? Let's use null.
-                                     console.warn(`Missing payment date for paid student ${firstName} ${lastName} in section ${currentSection}. Setting to null.`);
-                                 }
+                        if ((inPaidBlock || inUnpaidBlock) && !headerRowFound) {
+                            if (row[0] && typeof row[0] === 'string' && row[0].toLowerCase().includes('name')) {
+                                headerRowFound = true;
+                                return;
+                            }
+                        }
 
+                        if ((inPaidBlock || inUnpaidBlock) && headerRowFound && row.length >= 2) {
+                            const nameCell = String(row[0] || '').trim();
+                            let firstName, middleInitial = '', lastName;
 
-                                 importedStudents.push({
-                                     id: Date.now().toString() + Math.random(), // Temp ID
-                                     firstName: firstName,
-                                     lastName: lastName,
-                                     amount: amount,
-                                     section: currentSection,
-                                     isPaid: inPaidBlock, // Status determined by block
-                                     paymentDate: paymentDate
-                                 });
-                             } else {
-                                 importErrors.push(`Skipped row ${rowIndex + 1} in Section/Sheet '${currentSection}': Invalid data (Name: "${firstName} ${lastName}", Amount: "${row[2]}")`);
-                             }
+                            if (nameCell.includes(',')) {
+                                // "Last, First Middle" format
+                                const [lastNamePart, firstNamePart] = nameCell.split(',').map(part => part.trim());
+                                const firstNameParts = firstNamePart ? firstNamePart.split(' ') : [];
+                                
+                                if (firstNameParts.length > 1) {
+                                    const possibleMiddle = firstNameParts[firstNameParts.length - 1];
+                                    if (possibleMiddle.length === 1 || possibleMiddle.endsWith('.')) {
+                                        middleInitial = possibleMiddle.charAt(0).toUpperCase();
+                                        firstName = firstNameParts.slice(0, -1).join(' ');
+                                    } else {
+                                        firstName = firstNameParts.join(' ');
+                                    }
+                                } else {
+                                    firstName = firstNameParts.join(' ');
+                                }
+                                lastName = lastNamePart;
+                            } else {
+                                // "First Middle Last" format
+                                const parts = nameCell.split(' ').filter(p => p.trim());
+                                if (parts.length >= 2) {
+                                    if (parts.length === 2) {
+                                        firstName = parts[0];
+                                        lastName = parts[1];
+                                    } else {
+                                        const possibleMiddle = parts[parts.length - 2];
+                                        if (possibleMiddle.length === 1 || possibleMiddle.endsWith('.')) {
+                                            firstName = parts.slice(0, -2).join(' ');
+                                            middleInitial = possibleMiddle.charAt(0).toUpperCase();
+                                            lastName = parts[parts.length - 1];
+                                        } else {
+                                            firstName = parts.slice(0, -1).join(' ');
+                                            lastName = parts[parts.length - 1];
+                                        }
+                                    }
+                                }
+                            }
+
+                            let amountStr = String(row[1] || '0').replace(/[^0-9.-]+/g,"");
+                            const amount = parseFloat(amountStr);
+                            const paymentDateRaw = row[3];
+
+                            if (firstName && lastName && !isNaN(amount)) {
+                                let paymentDate = null;
+                                if (inPaidBlock && paymentDateRaw) {
+                                    if (paymentDateRaw instanceof Date) {
+                                        paymentDate = paymentDateRaw.toISOString().split('T')[0];
+                                    } else if (typeof paymentDateRaw === 'string') {
+                                        paymentDate = new Date(paymentDateRaw).toISOString().split('T')[0];
+                                    }
+                                }
+
+                                importedStudents.push({
+                                    id: Date.now().toString() + Math.random(),
+                                    firstName,
+                                    middleInitial,
+                                    lastName,
+                                    amount,
+                                    section: currentSection,
+                                    isPaid: inPaidBlock,
+                                    paymentDate
+                                });
+                            } else {
+                                importErrors.push(`Skipped row ${rowIndex + 1}: Invalid data (Name: "${nameCell}", Amount: "${row[1]}")`);
+                            }
                         }
                     });
                 });
@@ -690,24 +877,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (importedStudents.length > 0) {
-                    // Ask user whether to replace or append
-                     if (students.length === 0 || confirm("Import successful. Do you want to REPLACE existing student data with the imported data? \n\n(Cancel will APPEND the new data)")) {
-                         students = importedStudents;
-                         showFeedback(`${importedStudents.length} students imported, replacing existing data.`);
-                     } else {
-                         students = students.concat(importedStudents);
-                         showFeedback(`${importedStudents.length} students imported and appended to existing data.`);
-                     }
+                    if (students.length === 0 || confirm("Import successful. Replace existing data? Cancel = append.")) {
+                        students = importedStudents;
+                    } else {
+                        students = students.concat(importedStudents);
+                    }
                     updateDisplay();
                 } else {
-                     alert("No valid student data found in the Excel file according to the expected format.");
+                    alert("No valid student data found. Expected formats:\nLast, First Middle\nFirst Middle Last");
                 }
-
             } catch (error) {
-                console.error("Error reading or processing Excel file:", error);
-                alert("Error reading Excel file. Make sure it's a valid .xlsx file and not corrupted. \n\nDetails: " + error.message);
+                console.error("Error reading Excel file:", error);
+                alert("Error reading Excel file: " + error.message);
             } finally {
-                // Reset the file input so the same file can be selected again
                 input.value = null;
             }
         };
@@ -715,7 +897,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onerror = function(e) {
             console.error("FileReader error:", e);
             alert("Error reading file.");
-            input.value = null; // Reset input
+            input.value = null;
         };
 
         reader.readAsArrayBuffer(file);
@@ -787,61 +969,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const groupedStudents = groupStudentsBySection();
         const sortedSections = Object.keys(groupedStudents).sort();
 
-        // Create sheets for each section
         sortedSections.forEach(section => {
             const sectionStudents = groupedStudents[section];
             const paidStudentsList = sectionStudents.filter(s => s.isPaid).sort((a,b) => a.lastName.localeCompare(b.lastName));
             const unpaidStudentsList = sectionStudents.filter(s => !s.isPaid).sort((a,b) => a.lastName.localeCompare(b.lastName));
 
             const ws_data = [
-                [`Section: ${section}`], // Section Header
-                [], // Empty row
-                ['PAID STUDENTS'], // Paid Block Header
-                ['First Name', 'Last Name', 'Amount', 'Payment Status', 'Payment Date'], // Headers
+                [`Section: ${section}`],
+                [],
+                ['PAID STUDENTS'],
+                ['Name', 'Amount', 'Payment Status', 'Payment Date'],
                 ...paidStudentsList.map(student => [
-                    student.firstName,
-                    student.lastName,
-                    student.amount, // Export as number for easier calculations
+                    `${student.lastName}, ${student.firstName} ${student.middleInitial || ''}`,
+                    student.amount,
                     'PAID',
-                    student.paymentDate ? new Date(student.paymentDate) : null // Export dates as Date objects
+                    student.paymentDate ? new Date(student.paymentDate) : null
                 ]),
-                [], // Empty row separator
-                ['UNPAID STUDENTS'], // Unpaid Block Header
-                ['First Name', 'Last Name', 'Amount', 'Payment Status', 'Payment Date'], // Headers
+                [],
+                ['UNPAID STUDENTS'],
+                ['Name', 'Amount', 'Payment Status', 'Payment Date'],
                 ...unpaidStudentsList.map(student => [
-                    student.firstName,
-                    student.lastName,
+                    `${student.lastName}, ${student.firstName} ${student.middleInitial || ''}`,
                     student.amount,
                     'UNPAID',
-                    null // No payment date for unpaid
-                ]),
-                 [], // Empty row
-                 // Optional: Section Summary within the sheet (can be complex for import)
-                 // ['Section Summary'],
-                 // ['Total Students:', sectionStudents.length],
-                 // ... etc
+                    null
+                ])
             ];
 
             const ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-            // --- Formatting (Basic Example) ---
-             // Set column widths (approximate character widths)
-             ws['!cols'] = [ {wch:15}, {wch:15}, {wch:10}, {wch:15}, {wch:15} ];
-
-             // Find header rows and apply bold formatting (requires iterating rows)
-             // This is more complex with aoa_to_sheet, easier if using sheet_add_json
-             // Example: Find "PAID STUDENTS" row and apply bold style
-             // Note: Styling requires the full xlsx library or specific cell formatting logic
-
-             // Apply number format for amount column (Column C, starting from row 5 for paid, etc.)
-             // Apply date format for payment date column (Column E)
-              ws['C'] = { t: 'n', z: '"₱"#,##0.00' }; // Currency format
-              ws['E'] = { t: 'd', z: 'yyyy-mm-dd' }; // Date format
-
-             // Add the worksheet to the workbook
-             XLSX.utils.book_append_sheet(wb, ws, section);
+            ws['!cols'] = [ {wch:30}, {wch:10}, {wch:15}, {wch:15} ];
+            ws['B'] = { t: 'n', z: '"₱"#,##0.00' };
+            ws['D'] = { t: 'd', z: 'yyyy-mm-dd' };
+            XLSX.utils.book_append_sheet(wb, ws, section);
         });
-
 
         // Create Overall Summary Sheet
         const summaryData = [
@@ -854,30 +1014,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     .filter(s => s.isPaid && s.paymentDate)
                     .map(s => s.paymentDate)
                     .sort()
-                    .pop() || null; // Get latest date string or null
+                    .pop() || null;
 
                 return [
                     section,
                     sectionStudents.length,
-                    sectionStudents.reduce((sum, s) => sum + s.amount, 0), // Total Amount
-                    sectionStudents.filter(s => s.isPaid).length, // Paid Count
-                    sectionStudents.filter(s => !s.isPaid).length, // Unpaid Count
-                    latestPayment ? new Date(latestPayment) : null // Export date as Date object or null
+                    sectionStudents.reduce((sum, s) => sum + s.amount, 0),
+                    sectionStudents.filter(s => s.isPaid).length,
+                    sectionStudents.filter(s => !s.isPaid).length,
+                    latestPayment ? new Date(latestPayment) : null
                 ];
             })
         ];
         const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
-        // Formatting for summary sheet
         summaryWs['!cols'] = [ {wch:20}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:20} ];
-        summaryWs['C'] = { t: 'n', z: '"₱"#,##0.00' }; // Currency
-        summaryWs['F'] = { t: 'd', z: 'yyyy-mm-dd' }; // Date
+        summaryWs['C'] = { t: 'n', z: '"₱"#,##0.00' };
+        summaryWs['F'] = { t: 'd', z: 'yyyy-mm-dd' };
         XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
 
-        // Generate filename with timestamp
-        const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const dateStr = new Date().toISOString().split('T')[0];
         const filename = `SmartTreasurer_Export_${currentUser || 'All'}_${dateStr}.xlsx`;
-
-        // Write the workbook and trigger download
         XLSX.writeFile(wb, filename);
         showFeedback("Data exported successfully!");
     }

@@ -300,9 +300,6 @@ i.fa-bounce { /* Ensure bounce animation works */
 .modern-input { /* Alias for consistency if needed */
      /* Inherits styles from general input */
 }
-.modern-select { /* Alias for consistency if needed */
-    /* Inherits styles from general select */
-}
 
 .error-message {
     color: var(--danger-dark);
@@ -716,4 +713,176 @@ input:checked + .slider:before {
      .opening-content {
         padding: var(--spacing-medium);
      }
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background-color: var(--container-bg);
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+.sidebar-toggle {
+    position: absolute;
+    right: -40px;
+    top: 15px;
+    width: 40px;
+    height: 40px;
+    background-color: var(--container-bg);
+    border: none;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+}
+
+.sidebar-content {
+    width: 100%;
+    padding: var(--spacing-medium);
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding-bottom: var(--spacing-medium);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-medium);
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin-bottom: var(--spacing-small);
+}
+
+.sidebar-btn {
+    width: 100%;
+    text-align: left;
+    padding: 10px 15px;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-small);
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-btn:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.sidebar-dropdown .sidebar-btn {
+    justify-content: space-between;
+}
+
+.sidebar-submenu {
+    list-style: none;
+    padding-left: var(--spacing-medium);
+    margin-top: var(--spacing-small);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.sidebar-submenu.open {
+    max-height: 300px;
+}
+
+.sidebar-submenu li {
+    margin-bottom: 5px;
+}
+
+/* Adjust container when sidebar is open */
+.sidebar-open .container {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+}
+
+/* Move theme switch down when sidebar is open */
+.sidebar-open .theme-switch {
+    right: 20px;
+    top: 70px;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        left: -100%;
+        width: 80%;
+    }
+    
+    .sidebar.open {
+        left: 0;
+    }
+    
+    .sidebar-toggle {
+        right: -50px;
+        width: 50px;
+    }
+    
+    .sidebar-open .container {
+        margin-left: 80%;
+        width: 100%;
+    }
+}
+
+/* For the theme in main */
+.hidden {
+    display: none !important;
+}
+
+/* Collapsible section headers */
+.section-header {
+    cursor: pointer;
+    position: relative;
+    padding-right: 40px; /* Space for toggle icon */
+}
+
+.section-header::after {
+    content: '\f078'; /* FontAwesome chevron-down */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: transform 0.3s ease;
+}
+
+.section-header.collapsed::after {
+    content: '\f054'; /* FontAwesome chevron-right */
+    transform: translateY(-50%) rotate(0deg);
+}
+
+.section-content {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.section-content.collapsed {
+    max-height: 0 !important;
+    opacity: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
 }

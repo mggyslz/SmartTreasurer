@@ -87,6 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.deleteSectionPrompt = deleteSectionPrompt;
         window.deleteSection = deleteSection;
         window.toggleSection = toggleSection;
+        window.showSectionCharts = showSectionCharts;
+        window.hideSectionChartsModal = hideSectionChartsModal;
         
         document.getElementById('bulkAddForm').addEventListener('submit', handleBulkAdd);
         window.showBulkAddModal = () => document.getElementById('bulkAddModal').style.display = 'block';
@@ -1036,6 +1038,283 @@ document.addEventListener('DOMContentLoaded', () => {
         const filename = `SmartTreasurer_Export_${currentUser || 'All'}_${dateStr}.xlsx`;
         XLSX.writeFile(wb, filename);
         showFeedback("Data exported successfully!");
+    }
+    
+    // --- Chart Functions ---
+    let summaryPieChart = null;
+    let summaryBarChart = null;
+
+    function createSummaryCharts() {
+        // Check if canvas elements exist
+        const pieCanvas = document.getElementById('summaryPieChart');
+        const barCanvas = document.getElementById('summaryBarChart');
+        
+        if (!pieCanvas || !barCanvas) return;
+        
+        const pieCtx = pieCanvas.getContext('2d');
+        const barCtx = barCanvas.getContext('2d');
+        
+        // Get summary data
+        const totalPaid = students.filter(s => s.isPaid).length;
+        const totalUnpaid = students.length - totalPaid;
+        const totalAmount = students.reduce((sum, s) => sum + s.amount, 0);
+        const paidAmount = students.filter(s => s.isPaid).reduce((sum, s) => sum + s.amount, 0);
+        const unpaidAmount = totalAmount - paidAmount;
+        
+        // Destroy existing charts if they exist
+        if (summaryPieChart) {
+            summaryPieChart.destroy();
+            summaryPieChart = null;
+        }
+        if (summaryBarChart) {
+            summaryBarChart.destroy();
+            summaryBarChart = null;
+        }
+        
+        // Get current theme colors
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim();
+        const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
+        
+        // Colors that work with both themes
+        const paidColor = '#4CAF50'; // Green
+        const unpaidColor = '#FF9800'; // Orange
+        const totalColor = '#36a2eb'; // Blue
+        
+        // Pie Chart
+        summaryPieChart = new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Paid Students', 'Unpaid Students'],
+                datasets: [{
+                    data: [totalPaid, totalUnpaid],
+                    backgroundColor: [paidColor, unpaidColor],
+                    borderColor: [paidColor, unpaidColor],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: textColor,
+                            font: {
+                                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const percentage = Math.round((value / students.length) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        },
+                        bodyFont: {
+                            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Bar Chart
+        summaryBarChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Total Amount', 'Paid Amount', 'Unpaid Amount'],
+                datasets: [{
+                    label: 'Amount (₱)',
+                    data: [totalAmount, paidAmount, unpaidAmount],
+                    backgroundColor: [
+                        totalColor,
+                        paidColor,
+                        unpaidColor
+                    ],
+                    borderColor: [
+                        totalColor,
+                        paidColor,
+                        unpaidColor
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: textColor,
+                            callback: function(value) {
+                                return '₱' + value.toFixed(2);
+                            },
+                            font: {
+                                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                            }
+                        },
+                        grid: {
+                            color: borderColor
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: textColor,
+                            font: {
+                                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '₱' + context.raw.toFixed(2);
+                            }
+                        },
+                        bodyFont: {
+                            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function showSectionCharts() {
+        const modal = document.getElementById('sectionChartsModal');
+        if (modal) {
+            modal.style.display = 'block';
+            renderSectionCharts();
+        }
+    }
+
+    function hideSectionChartsModal() {
+        const modal = document.getElementById('sectionChartsModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    function renderSectionCharts() {
+        const container = document.getElementById('sectionChartsContainer');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        const groupedStudents = groupStudentsBySection();
+        const sortedSections = Object.keys(groupedStudents).sort();
+        
+        // Get current theme colors
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim();
+        
+        sortedSections.forEach(section => {
+            const sectionStudents = groupedStudents[section];
+            const paidCount = sectionStudents.filter(s => s.isPaid).length;
+            const unpaidCount = sectionStudents.length - paidCount;
+            
+            const chartItem = document.createElement('div');
+            chartItem.className = 'section-chart-item';
+            chartItem.innerHTML = `
+                <h4 class="section-chart-title">${section}</h4>
+                <canvas id="sectionChart-${section.replace(/\s+/g, '-')}"></canvas>
+            `;
+            container.appendChild(chartItem);
+            
+            const canvas = chartItem.querySelector('canvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+            
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Paid', 'Unpaid'],
+                    datasets: [{
+                        data: [paidCount, unpaidCount],
+                        backgroundColor: ['#4CAF50', '#FF9800'],
+                        borderColor: ['#4CAF50', '#FF9800'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: textColor,
+                                font: {
+                                    family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const percentage = Math.round((value / sectionStudents.length) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            },
+                            bodyFont: {
+                                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    // Update the updateDisplay function to include chart updates
+    function updateDisplay() {
+        if (!currentUser) return;
+
+        updateStudentList();
+        updateSummary();
+        updateSectionSummary();
+        saveStudents();
+
+        // Show/hide the "no students" message
+        if (noStudentsMessage) {
+            noStudentsMessage.style.display = students.length === 0 ? 'block' : 'none';
+        }
+        
+        // Show/hide the default section summary row
+        if (sectionSummaryDefaultRow) {
+            sectionSummaryDefaultRow.style.display = Object.keys(groupStudentsBySection()).length === 0 ? 'table-row' : 'none';
+        }
+
+        // Update charts if they exist
+        if (students.length > 0) {
+            createSummaryCharts();
+        } else {
+            // Destroy charts if no data
+            if (summaryPieChart) {
+                summaryPieChart.destroy();
+                summaryPieChart = null;
+            }
+            if (summaryBarChart) {
+                summaryBarChart.destroy();
+                summaryBarChart = null;
+            }
+        }
     }
 
 

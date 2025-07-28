@@ -923,13 +923,41 @@ input:checked + .slider:before {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     padding: var(--spacing-medium);
-    height: 250px;
+    height: 280px; /* Fixed height */
+    display: flex;
+    flex-direction: column;
 }
 
 .section-chart-title {
     text-align: center;
     margin-bottom: var(--spacing-small);
     font-weight: 600;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 200px; /* Fixed height for chart */
+    width: 100%;
+    margin: var(--spacing-small) 0;
+}
+
+.section-stats {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-medium);
+    margin-top: auto; /* Push to bottom */
+}
+
+.stat-item {
+    font-weight: bold;
+}
+
+.stat-item.paid {
+    color: var(--success-color);
+}
+
+.stat-item.unpaid {
+    color: var(--warning-color);
 }
 
 @media (max-width: 768px) {
@@ -940,4 +968,95 @@ input:checked + .slider:before {
     #sectionChartsContainer {
         grid-template-columns: 1fr;
     }
+}
+
+/* Add these to styles.css */
+.current-category {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: var(--spacing-medium);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-large);
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.current-category h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.current-category p {
+    margin: var(--spacing-small) 0 0 0;
+    opacity: 0.9;
+}
+
+.categories-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-medium);
+    margin-bottom: var(--spacing-large);
+}
+
+.category-card {
+    background-color: var(--container-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-medium);
+    position: relative;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-small);
+}
+
+.category-actions {
+    display: flex;
+    gap: var(--spacing-small);
+}
+
+.category-target {
+    font-weight: bold;
+    margin-top: var(--spacing-small);
+}
+
+.sidebar-select {
+    width: 100%;
+    margin-bottom: var(--spacing-medium);
+}
+
+/* Add responsive styles */
+@media (max-width: 768px) {
+    .categories-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Target Progress Styles */
+#targetProgress {
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+#targetAchieved {
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+/* Replace your current chart-card styles with these */
+.chart-card {
+    position: relative;
+    width: 100%;
+    min-height: 300px;
+    height: 300px; /* Fixed height for consistency */
+}
+
+/* Ensure canvas elements have proper dimensions */
+canvas {
+    display: block; /* Remove default inline spacing */
+    width: 100% !important;
+    height: 100% !important;
 }

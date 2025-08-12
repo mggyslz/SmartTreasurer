@@ -34,18 +34,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialize() {
         setupEventListeners();
         loadThemePreference();
-        
+
         // Check if there's a logged-in user in sessionStorage
         currentUser = sessionStorage.getItem('currentUser');
-        
+
         if (currentUser) {
             // User is logged in, load their data
             const savedData = localStorage.getItem(`smartTreasurerData_${currentUser}`);
-            
+
             if (savedData) {
                 try {
                     const parsedData = JSON.parse(savedData);
-                    
+
                     // Initialize appData with defaults first
                     appData = {
                         students: [],
@@ -53,17 +53,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         activeCategory: null,
                         currentUser: currentUser
                     };
-                    
+
                     // Then merge the saved data
                     if (parsedData.students) appData.students = parsedData.students;
                     if (parsedData.categories) appData.categories = parsedData.categories;
                     if (parsedData.activeCategory) appData.activeCategory = parsedData.activeCategory;
-                    
+
                     // Only migrate if we have students but no categories
                     if (appData.students.length > 0 && appData.categories.length === 0) {
                         migrateOldData();
                     }
-                    
+
                     // Ensure we have at least one category
                     if (appData.categories.length === 0) {
                         appData.categories.push({
@@ -73,15 +73,27 @@ document.addEventListener('DOMContentLoaded', () => {
                             targetAmount: 0
                         });
                         appData.activeCategory = 'default';
+
+                        appData.students.forEach(student => {
+                            if (!student.categories) student.categories = {};
+                            if (!student.categories['default']) {
+                                student.categories['default'] = {
+                                    amount: 0,
+                                    isPaid: false,
+                                    paymentDate: null,
+                                    transactions: []
+                                };
+                            }
+                        });
                     }
-                    
+
                     // Ensure activeCategory is valid
                     if (!appData.activeCategory || !appData.categories.some(c => c.id === appData.activeCategory)) {
                         appData.activeCategory = appData.categories[0].id;
                     }
-                    
+
                     saveData(); // Save any corrections
-                    
+
                 } catch (e) {
                     console.error("Error parsing saved data:", e);
                     // Initialize with default values if parsing fails
@@ -96,6 +108,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         activeCategory: 'default',
                         currentUser: currentUser
                     };
+
+                    appData.students.forEach(student => {
+                        if (!student.categories) student.categories = {};
+                        if (!student.categories['default']) {
+                            student.categories['default'] = {
+                                amount: 0,
+                                isPaid: false,
+                                paymentDate: null,
+                                transactions: []
+                            };
+                        }
+                    });
                 }
             } else {
                 // Initialize with default category if no data exists
@@ -110,13 +134,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     activeCategory: 'default',
                     currentUser: currentUser
                 };
+
+                // 🔥 Fix: Ensure student list (if any) has default category
+                appData.students.forEach(student => {
+                    if (!student.categories) student.categories = {};
+                    if (!student.categories['default']) {
+                        student.categories['default'] = {
+                            amount: 0,
+                            isPaid: false,
+                            paymentDate: null,
+                            transactions: []
+                        };
+                    }
+                });
+
                 saveData();
             }
-            
-            // Now render the UI
+
+            // Now render the UI - IMPORTANT: Render category select first!
             renderActiveCategorySelect();
             updateCurrentCategoryDisplay();
             updateDisplay();
+            populateSectionFilter();
             startApp();
         } else {
             // No user logged in, show opening screen
@@ -223,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             appData.categories.push(newCategory);
             
-            // Add this category to all students with default values
+            // Add this category to all students
             appData.students.forEach(student => {
                 if (!student.categories) student.categories = {};
                 student.categories[categoryId] = {
@@ -234,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             });
             
-            // Set as active if it's the first category
             if (appData.categories.length === 1) {
                 appData.activeCategory = categoryId;
             }
@@ -245,6 +283,9 @@ document.addEventListener('DOMContentLoaded', () => {
             updateCurrentCategoryDisplay();
             updateDisplay();
             document.getElementById('categoryForm').reset();
+            
+            // Close the modal explicitly
+            hideCategoryManagement();
         });
 
         // Category select listener
@@ -301,19 +342,61 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteCategory: function(categoryId) {
                 if (!confirm('Are you sure you want to delete this category? This will remove all related transaction data.')) return;
                 
+                // Store the category data before deletion (in case we need to migrate to default)
+                const categoryToDelete = appData.categories.find(c => c.id === categoryId);
+                const wasLastCategory = appData.categories.length === 1;
+                
                 // Remove category from categories list
                 appData.categories = appData.categories.filter(c => c.id !== categoryId);
                 
-                // Remove category from all students
-                appData.students.forEach(student => {
-                    if (student.categories && student.categories[categoryId]) {
-                        delete student.categories[categoryId];
-                    }
-                });
+                // If this was the last category, create a default category and migrate data
+                if (wasLastCategory && appData.students.length > 0) {
+                    const defaultCategory = {
+                        id: 'default',
+                        name: 'Default Payments',
+                        description: 'Created after category deletion',
+                        targetAmount: categoryToDelete ? categoryToDelete.targetAmount : 0
+                    };
+                    
+                    appData.categories.push(defaultCategory);
+                    appData.activeCategory = 'default';
+                    
+                    // Migrate existing student data to the new default category
+                    appData.students.forEach(student => {
+                        // Get the data from the deleted category
+                        const deletedCategoryData = student.categories && student.categories[categoryId] ? 
+                            student.categories[categoryId] : {
+                                amount: 0,
+                                isPaid: false,
+                                paymentDate: null,
+                                transactions: []
+                            };
+                        
+                        // Clear all categories
+                        student.categories = {};
+                        
+                        // Set the default category with the migrated data
+                        student.categories['default'] = {
+                            amount: deletedCategoryData.amount,
+                            isPaid: deletedCategoryData.isPaid,
+                            paymentDate: deletedCategoryData.paymentDate,
+                            transactions: deletedCategoryData.transactions || []
+                        };
+                    });
+                    
+                    console.log(`Migrated ${appData.students.length} students to default category`);
+                } else {
+                    // Remove category from all students (standard deletion)
+                    appData.students.forEach(student => {
+                        if (student.categories && student.categories[categoryId]) {
+                            delete student.categories[categoryId];
+                        }
+                    });
 
-                // Reset active category if it was deleted
-                if (appData.activeCategory === categoryId) {
-                    appData.activeCategory = appData.categories.length > 0 ? appData.categories[0].id : null;
+                    // Reset active category if it was deleted
+                    if (appData.activeCategory === categoryId) {
+                        appData.activeCategory = appData.categories.length > 0 ? appData.categories[0].id : null;
+                    }
                 }
                 
                 saveData();
@@ -321,6 +404,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderActiveCategorySelect();
                 updateCurrentCategoryDisplay();
                 updateDisplay();
+                
+                // Show appropriate feedback
+                if (wasLastCategory && appData.students.length > 0) {
+                    showFeedback(`Category deleted and ${appData.students.length} students migrated to default category.`);
+                } else {
+                    showFeedback('Category deleted successfully.');
+                }
             },
             
             // Bulk operations
@@ -332,6 +422,85 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('bulkAddModal').style.display = 'none';
                 document.getElementById('bulkAddForm').reset();
             },
+
+            switchTab: function(tabName) {
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Deactivate all tabs
+                document.querySelectorAll('.modal-tabs .tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Activate selected tab
+                if (tabName === 'single') {
+                    document.getElementById('studentForm').classList.add('active');
+                    document.querySelector('.modal-tabs .tab:first-child').classList.add('active');
+                } else if (tabName === 'bulk') {
+                    document.getElementById('bulkAddForm').classList.add('active');
+                    document.querySelector('.modal-tabs .tab:last-child').classList.add('active');
+                }
+                
+                // Reset forms when switching tabs
+                document.getElementById('studentForm').reset();
+                document.getElementById('bulkAddForm').reset();
+            },
+
+            // Search functions
+            searchStudents: function() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const showPaid = document.getElementById('searchPaid').checked;
+                const showUnpaid = document.getElementById('searchUnpaid').checked;
+                const sectionFilter = document.getElementById('searchSection').value;
+                
+                // If no search term and no section filter, show all students that match status filters
+                if (!searchTerm && !sectionFilter && showPaid && showUnpaid) {
+                    alert("Please enter a search term or select a section to filter");
+                    return;
+                }
+
+                let results = appData.students.filter(student => {
+                    // Check if student matches search term
+                    const nameMatch = searchTerm ? 
+                        (student.firstName.toLowerCase().includes(searchTerm) || 
+                        student.lastName.toLowerCase().includes(searchTerm) ||
+                        student.section.toLowerCase().includes(searchTerm)) : true;
+                    
+                    // Check if student matches section filter
+                    const sectionMatch = sectionFilter ? 
+                        student.section === sectionFilter : true;
+                    
+                    // Check payment status if active category exists
+                    let statusMatch = true;
+                    if (appData.activeCategory) {
+                        const categoryData = student.categories[appData.activeCategory];
+                        if (categoryData) {
+                            if (categoryData.isPaid && !showPaid) statusMatch = false;
+                            if (!categoryData.isPaid && !showUnpaid) statusMatch = false;
+                        }
+                    }
+                    
+                    return nameMatch && sectionMatch && statusMatch;
+                });
+                
+                if (results.length === 0) {
+                    showFeedback("No students found matching your criteria");
+                }
+                
+                displaySearchResults(results);
+            },
+            clearSearch: function() {
+                document.getElementById('searchInput').value = '';
+                document.getElementById('searchPaid').checked = true;
+                document.getElementById('searchUnpaid').checked = true;
+                document.getElementById('searchSection').value = '';
+                document.getElementById('searchResults').innerHTML = '';
+                document.getElementById('searchResults').classList.remove('show-results');
+            },
+
+
             
             // Charts
             showSectionCharts, hideSectionChartsModal
@@ -343,13 +512,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- Theme Handling ---
     function loadThemePreference() {
-        const savedTheme = localStorage.getItem('theme') || 'light'; // Default to light
+        // For login screen, always use light theme
+        if (!sessionStorage.getItem('currentUser')) {
+            setTheme('light');
+            return;
+        }
+        
+        // For logged-in users, use their preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
         setTheme(savedTheme);
     }
 
     function handleThemeToggle() {
         const newTheme = themeToggle.checked ? 'dark' : 'light';
         setTheme(newTheme);
+        refreshCharts();
     }
 
     function setTheme(theme) {
@@ -357,6 +534,15 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('theme', theme);
         themeToggle.checked = theme === 'dark';
         themeLabel.innerHTML = `<i class="fas ${theme === 'dark' ? 'fa-moon' : 'fa-sun'}"></i> ${theme === 'dark' ? 'Dark' : 'Light'} Mode`;
+        
+        // Only apply dark styles if logged in
+        if (sessionStorage.getItem('currentUser')) {
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.style.color = theme === 'dark' ? '#e0e0e0' : '#333333';
+                input.style.backgroundColor = theme === 'dark' ? '#1e1e1e' : '#ffffff';
+            });
+        }
     }
 // --- Authentication ---
 
@@ -506,10 +692,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function logout() {
         if (confirm("Are you sure you want to logout?")) {
+            // Reset to light theme
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+            
+            // Force light styles on inputs immediately
+            const inputs = document.querySelectorAll('#loginForm input, #signupForm input');
+            inputs.forEach(input => {
+                input.style.color = '#333333';
+                input.style.backgroundColor = '#ffffff';
+            });
+            
+            // Clear user data
             sessionStorage.removeItem('currentUser');
             currentUser = null;
-            appData = { students: [], categories: [], activeCategory: null, currentUser: null }; // Clear app data
-            window.location.reload(); // Reload the page to show the login screen
+            appData = { students: [], categories: [], activeCategory: null, currentUser: null };
+            
+            // Show login screen
+            openingScreen.style.display = 'flex';
+            openingScreen.style.opacity = '1';
         }
     }
 
@@ -517,13 +718,23 @@ document.addEventListener('DOMContentLoaded', () => {
         openingScreen.style.opacity = '0';
         setTimeout(() => {
             openingScreen.style.display = 'none';
-            updateDisplay(); // Initial display render after login
+            
+            // Ensure category UI is set up immediately
+            renderActiveCategorySelect();
+            updateCurrentCategoryDisplay();
+            updateDisplay();
         }, 500); // Match CSS transition duration
     }
 //---- Student Data Management ----
 
     function handleAddStudent(e) {
         e.preventDefault();
+        if (!appData.activeCategory || appData.categories.length === 0) {
+            alert("No category selected. Redirecting you to create one.");
+            hideAddStudentModal();
+            showCategoryManagement();
+            return;
+        }
         const isPaid = document.getElementById('isPaid').value === 'true';
         const amountInput = document.getElementById('amount');
         const amount = parseFloat(amountInput.value);
@@ -574,9 +785,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         appData.students.push(student);
-        saveData(); // Make sure to save the data
+        saveData();
         updateDisplay();
         hideAddStudentModal();
+        showFeedback(`Student ${student.firstName} ${student.lastName} added successfully!`); // Added success message
     }
 
     function handleBulkAdd(e) {
@@ -679,8 +891,8 @@ document.addEventListener('DOMContentLoaded', () => {
         appData.students = [...appData.students, ...newStudents];
         saveData();
         updateDisplay();
-        hideBulkAddModal();
-        showFeedback(`${newStudents.length} students added to section ${section}.`);
+        hideAddStudentModal(); // Hide the modal after successful bulk add
+        showFeedback(`${newStudents.length} students added to section ${section}.`); // Success message
     }
 
     function handleEditStudent(e) {
@@ -877,9 +1089,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 noStudentsMsg.innerHTML = '<p>Please create at least one payment category before adding students. <button onclick="showCategoryManagement()" class="btn btn-primary">Manage Categories</button></p>';
                 noStudentsMsg.style.display = 'block';
             }
+            // Make sure to render the category select even when no categories exist
+            renderActiveCategorySelect();
+            populateSectionFilter();
             return;
         }
 
+        // Always render the category select first, before updating other UI elements
+        renderActiveCategorySelect();
+        updateCurrentCategoryDisplay();
+        
         updateStudentList();
         updateSummary();
         updateSectionSummary();
@@ -919,6 +1138,81 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sectionSummaryDefaultRow) {
             sectionSummaryDefaultRow.style.display = Object.keys(groupStudentsBySection()).length === 0 ? 'table-row' : 'none';
         }
+    }
+
+    function displaySearchResults(results) {
+        const resultsContainer = document.getElementById('searchResults');
+        resultsContainer.innerHTML = '';
+        
+        if (results.length === 0) {
+            resultsContainer.innerHTML = '<div class="no-results">No matching students found</div>';
+            resultsContainer.classList.add('show-results');
+            return;
+        }
+        
+        // Create table
+        const table = document.createElement('table');
+        table.className = 'modern-table';
+        
+        // Create header
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr>
+                <th>Name</th>
+                <th>Section</th>
+                <th>Amount (₱)</th>
+                <th>Status</th>
+                <th>Payment Date</th>
+                <th>Actions</th>
+            </tr>
+        `;
+        table.appendChild(thead);
+        
+        // Create body
+        const tbody = document.createElement('tbody');
+        
+        results.forEach(student => {
+            const originalIndex = appData.students.findIndex(s => s.id === student.id);
+            const categoryData = appData.activeCategory ? student.categories[appData.activeCategory] : null;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${student.lastName}, ${student.firstName} ${student.middleInitial || ''}</td>
+                <td>${student.section}</td>
+                <td>${categoryData ? categoryData.amount.toFixed(2) : '0.00'}</td>
+                <td class="status-${categoryData && categoryData.isPaid ? 'paid' : 'unpaid'}">
+                    <i class="fas ${categoryData && categoryData.isPaid ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    ${categoryData && categoryData.isPaid ? 'Paid' : 'Unpaid'}
+                </td>
+                <td>${categoryData && categoryData.paymentDate ? categoryData.paymentDate : 'N/A'}</td>
+                <td>
+                    <button onclick="togglePaymentStatus(${originalIndex})" class="btn btn-secondary btn-sm" title="${categoryData && categoryData.isPaid ? 'Mark as Unpaid' : 'Mark as Paid'}">
+                        <i class="fas ${categoryData && categoryData.isPaid ? 'fa-times' : 'fa-check'}"></i>
+                    </button>
+                    <button onclick="showEditForm(${originalIndex})" class="btn btn-primary btn-sm" title="Edit Student">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        table.appendChild(tbody);
+        resultsContainer.appendChild(table);
+        resultsContainer.classList.add('show-results');
+    }
+
+    function populateSectionFilter() {
+        const sectionSelect = document.getElementById('searchSection');
+        sectionSelect.innerHTML = '<option value="">All Sections</option>';
+        
+        const sections = [...new Set(appData.students.map(s => s.section))].sort();
+        sections.forEach(section => {
+            const option = document.createElement('option');
+            option.value = section;
+            option.textContent = section;
+            sectionSelect.appendChild(option);
+        });
     }
 
     function updateStudentList() {
@@ -1124,7 +1418,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderActiveCategorySelect() {
         const select = document.getElementById('activeCategorySelect');
-        if (!select) return;
+        if (!select) {
+            console.warn("Category select element not found in DOM");
+            return;
+        }
+        
+        // Store the current selection before clearing
+        const currentSelection = select.value;
         
         select.innerHTML = '<option value="">Select a category</option>';
         
@@ -1137,7 +1437,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const option = document.createElement('option');
             option.value = category.id;
             option.textContent = category.name;
-            if (category.id === appData.activeCategory) {
+            // Restore selection if it was previously selected and still exists
+            if (category.id === appData.activeCategory || category.id === currentSelection) {
                 option.selected = true;
             }
             select.appendChild(option);
@@ -1146,7 +1447,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // If no active category is set but we have categories, set the first one as active
         if (!appData.activeCategory && appData.categories.length > 0) {
             appData.activeCategory = appData.categories[0].id;
+            select.value = appData.activeCategory;
             saveData();
+        }
+        
+        // Make sure the select shows the correct active category
+        if (appData.activeCategory) {
+            select.value = appData.activeCategory;
         }
     }
 
@@ -1180,11 +1487,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // ---- Modal & Sidebar Handling ----
     function showAddStudentModal() {
         addStudentModal.style.display = 'block';
+        // Reset to single add tab by default
+        switchTab('single');
     }
 
     function hideAddStudentModal() {
         addStudentModal.style.display = 'none';
-        studentForm.reset(); // Clear the form when hiding
+        studentForm.reset(); // Clear the single add form
+        document.getElementById('bulkAddForm').reset(); // Clear the bulk add form
     }
 
     function toggleSidebar() {
@@ -1834,42 +2144,35 @@ document.addEventListener('DOMContentLoaded', () => {
     let summaryBarChart = null;
 
     function createSummaryCharts() {
-        // Destroy existing charts
-        if (summaryPieChart) {
-            summaryPieChart.destroy();
-            summaryPieChart = null;
-        }
-        if (summaryBarChart) {
-            summaryBarChart.destroy();
-            summaryBarChart = null;
-        }
+        // Get current theme colors
+        const computedStyle = getComputedStyle(document.documentElement);
+        const textColor = computedStyle.getPropertyValue('--text-color').trim();
+        const borderColor = computedStyle.getPropertyValue('--border-color').trim();
+        
+        // Destroy old charts if they exist
+        if (summaryPieChart) summaryPieChart.destroy();
+        if (summaryBarChart) summaryBarChart.destroy();
 
+        // Create new charts with current theme
         const pieCanvas = document.getElementById('summaryPieChart');
         const barCanvas = document.getElementById('summaryBarChart');
+        
+        if (pieCanvas && barCanvas) {
+            try {
+                summaryPieChart = new Chart(pieCanvas.getContext('2d'), {
+                    type: 'doughnut',
+                    data: getPieChartData(),
+                    options: getChartOptions('Payment Status', textColor, borderColor, 'pie')
+                });
 
-        // Skip if elements missing or no students
-        if (!pieCanvas || !barCanvas || appData.students.length === 0) return;
-
-        // Get computed styles for theme colors
-        const computedStyle = getComputedStyle(document.documentElement);
-        const textColor = computedStyle.getPropertyValue('--text-color')?.trim() || '#333333';
-        const borderColor = computedStyle.getPropertyValue('--border-color')?.trim() || '#e0e0e0';
-
-        // Create charts with error handling
-        try {
-            summaryPieChart = new Chart(pieCanvas.getContext('2d'), {
-                type: 'doughnut',
-                data: getPieChartData(),
-                options: getChartOptions('Payment Status', textColor, borderColor, 'pie')
-            });
-
-            summaryBarChart = new Chart(barCanvas.getContext('2d'), {
-                type: 'bar',
-                data: getBarChartData(),
-                options: getChartOptions('Payment Amounts by Status', textColor, borderColor, 'bar')
-            });
-        } catch (error) {
-            console.error('Error creating charts:', error);
+                summaryBarChart = new Chart(barCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: getBarChartData(),
+                    options: getChartOptions('Payment Amounts by Status', textColor, borderColor, 'bar')
+                });
+            } catch (error) {
+                console.error('Error recreating charts:', error);
+            }
         }
     }
 
@@ -2105,6 +2408,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         return baseOptions;
+    }
+
+    function refreshCharts() {
+    // Destroy existing charts
+        if (summaryPieChart) {
+            summaryPieChart.destroy();
+            summaryPieChart = null;
+        }
+        if (summaryBarChart) {
+            summaryBarChart.destroy();
+            summaryBarChart = null;
+        }
+        
+        // Recreate charts after a small delay to allow theme CSS to update
+        setTimeout(() => {
+            if (appData.students.length > 0 && appData.activeCategory) {
+                createSummaryCharts();
+            }
+        }, 100);
     }
 
     function showSectionCharts() {

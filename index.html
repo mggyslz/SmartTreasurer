@@ -90,7 +90,6 @@
             </div>
         </div>
 
-                <!-- Add this right after the app-header in index.html -->
         <div class="current-category" id="currentCategoryDisplay">
             <h2 id="currentCategoryName">No Category Selected</h2>
             <p id="currentCategoryDescription">Please select a category to view student payments</p>
@@ -110,59 +109,79 @@
             </div>
         </div>
 
-        <!-- Modals (Add Student / Bulk Add) -->
+                <!-- Add Student / Bulk Add Modal -->
         <div id="addStudentModal" class="modal">
             <div class="modal-content card">
-                <span class="close" onclick="hideAddStudentModal()">×</span>
-                <h2><i class="fas fa-user-plus"></i> Add New Student</h2>
-                <button onclick="showBulkAddModal()" class="btn btn-secondary"><i class="fas fa-users"></i> Bulk Add by Section</button>
-                <form id="studentForm" class="modal-form">
-                    <div class="form-group">
-                        <label for="firstName"><i class="fas fa-user"></i> First Name:</label>
-                        <input type="text" id="firstName" required placeholder="e.g., Juan" />
+                <div class="modal-header">
+                    <h2 id="modalTitle"><i class="fas fa-user-plus"></i> Add New Student</h2>
+                    <span class="close" onclick="hideAddStudentModal()">×</span>
+                </div>
+
+                <!-- Tab Switcher -->
+                <div class="modal-tabs">
+                    <div class="tab active" onclick="switchTab('single')">
+                        <i class="fas fa-user"></i> Single Add
                     </div>
-                    <div class="form-group">
-                        <label for="middleInitial"><i class="fas fa-user"></i> Middle Initial:</label>
-                        <input type="text" id="middleInitial" placeholder="e.g., B" maxlength="1" />
+                    <div class="tab" onclick="switchTab('bulk')">
+                        <i class="fas fa-users"></i> Bulk Add
                     </div>
+                </div>
+
+                <!-- Single Add Form -->
+                <form id="studentForm" class="modal-form tab-content active">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName"><i class="fas fa-user"></i> First Name</label>
+                            <input type="text" id="firstName" required placeholder="e.g., Juan" />
+                        </div>
+                        <div class="form-group small">
+                            <label for="middleInitial"><i class="fas fa-user"></i> M.I.</label>
+                            <input type="text" id="middleInitial" placeholder="B" maxlength="1" />
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label for="lastName"><i class="fas fa-user"></i> Last Name:</label>
+                        <label for="lastName"><i class="fas fa-user"></i> Last Name</label>
                         <input type="text" id="lastName" required placeholder="e.g., Dela Cruz" />
                     </div>
+
                     <div class="form-group">
-                        <label for="section"><i class="fas fa-users-rectangle"></i> Section:</label>
+                        <label for="section"><i class="fas fa-users-rectangle"></i> Section</label>
                         <input type="text" id="section" required placeholder="e.g., BSCS-3A" />
                     </div>
-                    <div class="form-group">
-                        <label for="amount"><i class="fas fa-coins"></i> Amount (₱):</label>
-                        <input type="number" id="amount" required placeholder="e.g., 100" step="0.01" min="0" />
-                    </div>
-                    <div class="form-group">
-                        <label for="isPaid"><i class="fas fa-cash-register"></i> Payment Status:</label>
-                        <select id="isPaid" class="modern-select">
-                            <option value="false">⚠️ Unpaid</option>
-                            <option value="true">✅ Paid</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-plus-circle"></i> Add Student</button>
-                </form>
-            </div>
-        </div>
 
-        <div id="bulkAddModal" class="modal">
-            <div class="modal-content card">
-                <span class="close" onclick="hideBulkAddModal()">×</span>
-                <h2><i class="fas fa-users"></i> Bulk Add Students</h2>
-                <form id="bulkAddForm" class="modal-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="amount"><i class="fas fa-coins"></i> Amount (₱)</label>
+                            <input type="number" id="amount" required placeholder="100" step="0.01" min="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="isPaid"><i class="fas fa-cash-register"></i> Status</label>
+                            <select id="isPaid" class="modern-select">
+                                <option value="false">⚠️ Unpaid</option>
+                                <option value="true">✅ Paid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-plus-circle"></i> Add Student
+                    </button>
+                </form>
+
+                <!-- Bulk Add Form -->
+                <form id="bulkAddForm" class="modal-form tab-content">
                     <div class="form-group">
-                        <label for="bulkSection"><i class="fas fa-users-rectangle"></i> Section:</label>
+                        <label for="bulkSection"><i class="fas fa-users-rectangle"></i> Section</label>
                         <input type="text" id="bulkSection" required placeholder="e.g., BSIT-2B" />
                     </div>
                     <div class="form-group">
-                        <label for="studentNames"><i class="fas fa-list-ul"></i> Student Names (First M. Last per line):</label>
-                        <textarea id="studentNames" rows="6" placeholder="Accepted formats:&#10;Dela Cruz, Juan B.&#10;Smith, Mary Jane&#10;Juan B. Dela Cruz&#10;Mary Jane Smith" required style="width: 100%; padding: 10px;"></textarea>
+                        <label for="studentNames"><i class="fas fa-list-ul"></i> Student Names (First M. Last per line)</label>
+                        <textarea id="studentNames" rows="6" placeholder="Accepted formats:&#10;Dela Cruz, Juan B.&#10;Smith, Mary Jane&#10;Juan B. Dela Cruz&#10;Mary Jane Smith" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-plus-circle"></i> Add Students</button>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-plus-circle"></i> Add Students
+                    </button>
                 </form>
             </div>
         </div>
@@ -171,47 +190,79 @@
         <div id="editForm" class="edit-form card" style="display: none;">
             <div class="edit-form-header">
                 <h2><i class="fas fa-edit"></i> Edit Student</h2>
-                <button type="button" class="btn-close-inline" onclick="hideEditForm()"><i class="fas fa-times"></i></button>
             </div>
-            <form id="studentEditForm">
+            <form id="studentEditForm" class="full-width-form">
                 <input type="hidden" id="editIndex" />
-                <div class="form-group">
-                    <label for="editFirstName"><i class="fas fa-user"></i> First Name:</label>
-                    <input type="text" id="editFirstName" required />
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editFirstName"><i class="fas fa-user"></i> First Name</label>
+                        <input type="text" id="editFirstName" required />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editMiddleInitial"><i class="fas fa-user"></i> M.I.</label>
+                        <input type="text" id="editMiddleInitial" maxlength="1" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editLastName"><i class="fas fa-user"></i> Last Name</label>
+                        <input type="text" id="editLastName" required />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editSection"><i class="fas fa-users-rectangle"></i> Section</label>
+                        <input type="text" id="editSection" required />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editAmount"><i class="fas fa-coins"></i> Amount (₱)</label>
+                        <input type="number" id="editAmount" required step="0.01" min="0" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editIsPaid"><i class="fas fa-cash-register"></i> Status</label>
+                        <select id="editIsPaid" class="modern-select">
+                            <option value="false">⚠️ Unpaid</option>
+                            <option value="true">✅ Paid</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editPaymentDate"><i class="fas fa-calendar-alt"></i> Date</label>
+                        <input type="date" id="editPaymentDate" class="modern-input" />
+                        <small class="form-hint">Leave blank for today</small>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="editMiddleInitial"><i class="fas fa-user"></i> Middle Initial:</label>
-                    <input type="text" id="editMiddleInitial" maxlength="1" />
-                </div>
-                <div class="form-group">
-                    <label for="editLastName"><i class="fas fa-user"></i> Last Name:</label>
-                    <input type="text" id="editLastName" required />
-                </div>
-                <div class="form-group">
-                    <label for="editSection"><i class="fas fa-users-rectangle"></i> Section:</label>
-                    <input type="text" id="editSection" required />
-                </div>
-                <div class="form-group">
-                    <label for="editAmount"><i class="fas fa-coins"></i> Amount (₱):</label>
-                    <input type="number" id="editAmount" required step="0.01" min="0" />
-                </div>
-                <div class="form-group">
-                    <label for="editIsPaid"><i class="fas fa-cash-register"></i> Payment Status:</label>
-                    <select id="editIsPaid" class="modern-select">
-                        <option value="false">⚠️ Unpaid</option>
-                        <option value="true">✅ Paid</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="editPaymentDate"><i class="fas fa-calendar-alt"></i> Payment Date:</label>
-                    <input type="date" id="editPaymentDate" class="modern-input" />
-                    <small>Leave blank to auto-set today's date if marking as Paid.</small>
-                </div>
+                
                 <div class="edit-form-actions">
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
                     <button type="button" class="btn btn-secondary" onclick="hideEditForm()"><i class="fas fa-times"></i> Cancel</button>
                 </div>
             </form>
+        </div>
+
+        <!-- Search -->
+        <div class="search-container card">
+            <div class="search-header">
+                <h2><i class="fas fa-search"></i> Search Students</h2>
+            </div>
+            <div class="search-controls">
+                <div class="search-input-container">
+                    <input type="text" id="searchInput" placeholder="Search by name or section..." class="search-input">
+                    <div class="search-actions">
+                        <button class="btn btn-primary" onclick="searchStudents()"><i class="fas fa-search"></i> Search</button>
+                        <button class="btn btn-secondary" onclick="clearSearch()"><i class="fas fa-times"></i> Clear</button>
+                    </div>
+                </div>
+                <div class="search-filters">
+                    <label><input type="checkbox" id="searchPaid" checked> Paid</label>
+                    <label><input type="checkbox" id="searchUnpaid" checked> Unpaid</label>
+                    <select id="searchSection" class="modern-select">
+                        <option value="">All Sections</option>
+                    </select>
+                </div>
+            </div>
+            <div id="searchResults" class="search-results"></div>
         </div>
 
         <!-- Section Lists -->
@@ -326,7 +377,7 @@
             <div id="sectionChartsContainer" ></div>
         </div>
     </div>
-    <!-- Add this modal at the bottom of index.html, before the closing body tag -->
+    <!-- Category Modal -->
     <div id="categoryManagementModal" class="modal">
         <div class="modal-content card">
             <span class="close" onclick="hideCategoryManagement()">×</span>

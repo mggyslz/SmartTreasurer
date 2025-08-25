@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>SmartTreasurer</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
@@ -82,7 +83,7 @@
                 <p><i class="fas fa-times-circle status-unpaid"></i> Total Unpaid: <strong id="totalUnpaid">0</strong></p>
                 <!-- Add this new line for target progress -->
                 <p><i class="fas fa-bullseye"></i> Target Progress: 
-                    <strong id="targetProgress">₱0 / ₱0 (0%)</strong>
+                    <strong id="targetProgress">₱0.00 / ₱0.00 (0%)</strong>
                     <span id="targetAchieved" style="display:none; margin-left:10px;">
                         <i class="fas fa-check-circle" style="color:var(--success-color)"></i> Target Achieved!
                     </span>
@@ -345,12 +346,12 @@
                 <!-- Appearance & Settings -->
                 <li>
                     <button onclick="toggleThemeFromSidebar()" class="btn btn-secondary sidebar-btn">
-                        <i class="fas fa-moon"></i> Toggle Theme
+                        <i class="fas fa-moon"></i> Theme
                     </button>
                 </li>
                 <li>
                     <button onclick="showCategoryManagement()" class="btn btn-secondary sidebar-btn">
-                        <i class="fas fa-layer-group"></i> Manage Categories
+                        <i class="fas fa-layer-group"></i> Categories
                     </button>
                 </li>
 
@@ -411,6 +412,6 @@
 
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="main.js"></script>
+    <script src="main.js" defer></script>
 </body>
 </html>

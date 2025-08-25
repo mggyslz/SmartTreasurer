@@ -325,12 +325,15 @@ i.fa-bounce { /* Ensure bounce animation works */
     padding: var(--spacing-medium);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    background: var(--background-color, #fff);
+    background: var(--container-bg);
     box-shadow: 
-        0 2px 4px rgba(0, 0, 0, 0.1),  /* soft bottom shadow */
-        0 4px 8px rgba(0, 0, 0, 0.08); /* deeper offset shadow */
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        0 4px 8px rgba(0, 0, 0, 0.08);
+    color: var(--text-color);
+    transition: background-color var(--transition-speed) ease, 
+                border-color var(--transition-speed) ease,
+                color var(--transition-speed) ease;
 }
-
 
 .edit-form-header {
     display: flex;
@@ -344,6 +347,11 @@ i.fa-bounce { /* Ensure bounce animation works */
 .edit-form-header h2 {
     margin: 0;
     font-size: 1.25rem;
+    color: var(--primary-color);
+}
+
+[data-theme="dark"] .edit-form-header h2 {
+    color: var(--primary-light);
 }
 
 .full-width-form {
@@ -365,6 +373,33 @@ i.fa-bounce { /* Ensure bounce animation works */
     padding-top: var(--spacing-medium);
     border-top: 1px solid var(--border-color);
 }
+/* Form elements in edit form */
+.edit-form .form-group label {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.edit-form input,
+.edit-form select {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.edit-form input:focus,
+.edit-form select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+}
+
+.edit-form .form-hint {
+    color: var(--text-muted);
+}
+
+/* Buttons in edit form */
+.edit-form .btn {
+    transition: background-color var(--transition-speed) ease;
+}
 
 @media (max-width: 768px) {
     .form-grid {
@@ -382,6 +417,42 @@ i.fa-bounce { /* Ensure bounce animation works */
     .edit-form-actions .btn {
         width: 100%;
     }
+}
+
+/* Enhanced form styling for dark mode support */
+.edit-form input::placeholder,
+.edit-form textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+[data-theme="dark"] .edit-form input,
+[data-theme="dark"] .edit-form select,
+[data-theme="dark"] .edit-form textarea {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .edit-form input:focus,
+[data-theme="dark"] .edit-form select:focus,
+[data-theme="dark"] .edit-form textarea:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(200, 230, 201, 0.3);
+}
+
+[data-theme="dark"] .edit-form .form-hint {
+    color: var(--text-muted-dark);
+}
+
+/* Ensure all buttons have proper transitions */
+.edit-form .btn {
+    transition: all var(--transition-speed) ease;
+}
+
+/* Modal backdrop for dark mode */
+[data-theme="dark"] .modal {
+    background-color: rgba(0, 0, 0, 0.7);
 }
 
 /* --- Tables --- */
@@ -695,6 +766,89 @@ i.fa-bounce { /* Ensure bounce animation works */
 }
 .close:hover {
     color: var(--danger-color);
+}
+
+[data-theme="dark"] .modal-content {
+    background-color: var(--container-bg-dark);
+    color: var(--text-color-dark);
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .modal-tabs {
+    background-color: var(--bg-color-dark);
+}
+
+[data-theme="dark"] .modal-tabs .tab:not(.active):hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .modal input,
+[data-theme="dark"] .modal select,
+[data-theme="dark"] .modal textarea {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .modal label {
+    color: var(--text-muted-dark);
+}
+
+/* Add/Bulk Student (Dark Mode) */
+
+[data-theme="dark"] #addStudentModal .modal-content,
+[data-theme="dark"] #bulkAddForm {
+    color: var(--text-color-dark); /* White text from your variables */
+}
+
+[data-theme="dark"] #addStudentModal label,
+[data-theme="dark"] #bulkAddForm label {
+    color: var(--text-color-dark);
+}
+
+[data-theme="dark"] #addStudentModal input::placeholder,
+[data-theme="dark"] #bulkAddForm textarea::placeholder {
+    color: var(--text-muted-dark);
+}
+
+[data-theme="dark"] #addStudentModal h2,
+[data-theme="dark"] #bulkAddForm h2 {
+    color: var(--primary-light); /* Light green for headings */
+}
+
+/* Payment Categories (Dark Mode) */
+[data-theme="dark"] #categoryManagementModal .modal-content {
+    color: var(--text-color-dark); /* White text */
+}
+
+[data-theme="dark"] .category-form {
+    color: var(--text-color-dark);
+}
+
+[data-theme="dark"] .category-header,
+[data-theme="dark"] .category-content,
+[data-theme="dark"] .category-target {
+    color: var(--text-color-dark);
+}
+
+[data-theme="dark"] #categoryForm label {
+    color: var(--text-color-dark);
+}
+
+[data-theme="dark"] .category-card h3 {
+    color: var(--primary-light);
+}
+
+/* Input fields styling */
+[data-theme="dark"] #categoryForm input,
+[data-theme="dark"] #categoryForm textarea {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] #categoryForm input::placeholder {
+    color: var(--text-muted-dark);
 }
 
 /* Animation */
@@ -1097,11 +1251,11 @@ input:checked + .slider:before {
 .section-header {
     cursor: pointer;
     position: relative;
-    padding-right: 40px; /* Space for toggle icon */
+    padding-right: 40px; 
 }
 
 .section-header::after {
-    content: '\f078'; /* FontAwesome chevron-down */
+    content: '\f078'; 
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     position: absolute;
@@ -1117,8 +1271,10 @@ input:checked + .slider:before {
 }
 
 .section-content {
-    transition: all 0.3s ease;
+    transition: height 0.3s ease, opacity 0.3s ease;
     overflow: hidden;
+    opacity: 1;
+    height: auto;
 }
 
 .section-content.collapsed {
@@ -1127,8 +1283,11 @@ input:checked + .slider:before {
     padding: 0;
     margin: 0;
     border: none;
+    overflow: hidden;
 }
-
+.section-content.collapsed .modern-table {
+    visibility: hidden;
+}
 /* --- Charts --- */
 .charts-section {
     margin-top: var(--spacing-large);
@@ -1175,15 +1334,28 @@ input:checked + .slider:before {
    background: #22c55e; 
 }
 
+[data-theme="dark"] .charts-section {
+    background-color: var(--container-bg-dark);
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .chart-card {
+    background-color: var(--bg-color-dark);
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .chart-card::before {
+    background: var(--secondary-color); /* Using your --secondary-color */
+}
+
 /* Section Charts Modal */
 #sectionChartsContainer {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Force 2 columns */
-    grid-template-rows: repeat(2, 1fr); /* Force 2 rows */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
     gap: var(--spacing-medium);
     margin-top: var(--spacing-medium);
-    height: 600px; /* Fixed height to contain all charts */
-    overflow: hidden; /* Prevent scrolling */
+    height: auto; /* Let the height adapt */
+    overflow: auto; /* Scroll only if needed */
 }
 
 .section-chart-item {
@@ -1253,6 +1425,22 @@ input:checked + .slider:before {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+[data-theme="dark"] #sectionChartsModal .modal-content {
+    background-color: var(--container-bg-dark);
+}
+
+[data-theme="dark"] .section-chart-item {
+    background-color: var(--bg-color-dark);
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .section-stats {
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .section-chart-item::before {
+    background: var(--secondary-color);
+}
 #sectionChartsModal .modal-content {
     max-width: 1000px; /* Wider modal */
     width: 90%;
@@ -1281,7 +1469,6 @@ input:checked + .slider:before {
     }
 }
 
-/* Add this to ensure charts resize properly */
 .section-chart-item canvas {
     width: 100% !important;
     height: 100% !important;
@@ -1451,14 +1638,41 @@ input:checked + .slider:before {
     box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
 }
 
-/* Responsive adjustments */
+[data-theme="dark"] #categoryManagementModal .modal-content {
+    background-color: var(--container-bg-dark);
+}
+
+[data-theme="dark"] #categoryManagementModal .modal-content h2 {
+    color: var(--primary-light); /* Light green */
+}
+
+[data-theme="dark"] .category-card {
+    background-color: var(--bg-color-dark);
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .category-header {
+    border-color: var(--border-color-dark);
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .category-form {
+    background-color: var(--bg-color-dark);
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .category-card h3 {
+    color: var(--primary-light); /* Light green */
+}
+
+
 @media (max-width: 768px) {
     #categoryManagementModal .modal-content {
         padding: var(--spacing-medium);
     }
     
     .category-actions {
-        opacity: 1; /* Always show on mobile */
+        opacity: 1;
     }
 }
 
@@ -1477,8 +1691,8 @@ input:checked + .slider:before {
     margin-bottom: var(--spacing-large);
     text-align: center;
     box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    transition: all 0.3s ease; /* smooth animation */
-    cursor: pointer; /* shows it's clickable */
+    transition: all 0.3s ease; 
+    cursor: pointer; 
 }
 
 .current-category:hover {
@@ -1486,7 +1700,7 @@ input:checked + .slider:before {
     box-shadow: 0 12px 24px rgba(0,0,0,0.18);
     background: linear-gradient(
         135deg, 
-        rgba(34, 197, 94, 1),   /* slightly brighter */
+        rgba(34, 197, 94, 1),  
         rgba(22, 163, 74, 1)
     );
 }
@@ -1508,8 +1722,6 @@ input:checked + .slider:before {
     font-size: 1rem;
     font-weight: 400;
 }
-
-
 
 .categories-container {
     display: grid;
@@ -1548,6 +1760,23 @@ input:checked + .slider:before {
     margin-bottom: var(--spacing-medium);
 }
 
+[data-theme="dark"] .current-category {
+    background: linear-gradient(
+        135deg, 
+        rgba(44, 62, 80, 0.9), /* Using your --header-bg-dark color */
+        rgba(30, 64, 175, 0.9)
+    );
+    border: 1px solid var(--border-color-dark);
+}
+
+[data-theme="dark"] .current-category:hover {
+    background: linear-gradient(
+        135deg, 
+        rgba(44, 62, 80, 1),
+        rgba(30, 64, 175, 1)
+    );
+}
+
 /* Add responsive styles */
 @media (max-width: 768px) {
     .categories-container {
@@ -1566,17 +1795,31 @@ input:checked + .slider:before {
     font-weight: bold;
 }
 
-/* Replace your current chart-card styles with these */
+.target-progress-low {
+    color: var(--warning-color) !important;
+}
+
+.target-progress-complete {
+    color: var(--success-color) !important;
+    font-weight: 800 !important;
+}
+.target-exceeded {
+    background-color: #4caf50 !important;
+}
+.progress-bar {
+    transition: width 0.5s ease-in-out;
+}
+
 .chart-card {
     position: relative;
     width: 100%;
     min-height: 300px;
-    height: 300px; /* Fixed height for consistency */
+    height: 300px; 
 }
 
 /* Ensure canvas elements have proper dimensions */
 canvas {
-    display: block; /* Remove default inline spacing */
+    display: block; 
     width: 100% !important;
     height: 100% !important;
 }
@@ -1720,6 +1963,29 @@ canvas {
     top: 0;
 }
 
+[data-theme="dark"] .search-container {
+    background-color: var(--container-bg-dark);
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .search-header h2 {
+    color: var(--primary-light); /* Light green (#C8E6C9) */
+}
+
+[data-theme="dark"] .search-input {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+    border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .search-filters label {
+    color: var(--text-muted-dark);
+}
+
+[data-theme="dark"] .search-filters label:hover {
+    color: var(--text-color-dark);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .search-input-container {
@@ -1743,4 +2009,50 @@ canvas {
     .modern-select {
         width: 100%;
     }
+}
+
+/* Show Feedback */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: 300px;
+}
+
+.feedback-toast {
+    background: var(--card-bg);
+    color: var(--text-color);
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideIn 0.3s ease;
+}
+
+.success-message {
+    border-left: 4px solid var(--success-color);
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+}
+
+.toast-content i {
+    margin-right: 8px;
+}
+
+.fade-out {
+    animation: slideOut 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
 }

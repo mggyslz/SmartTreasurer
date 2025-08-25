@@ -1156,6 +1156,19 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSummary();
         updateSectionSummary();
         
+        // **FIX: Clear chart cache and force chart recreation**
+        chartDataCache.pie = null;
+        chartDataCache.bar = null;
+        previousState.pieData = null;
+        previousState.barData = null;
+        
+        // Force chart update after a small delay to ensure DOM updates are complete
+        setTimeout(() => {
+            if (appData.students.length > 0 && appData.activeCategory) {
+                createSummaryCharts();
+            }
+        }, 100);
+        
         hideEditForm();
         showFeedback(`Student ${updatedStudent.firstName} ${updatedStudent.lastName} updated successfully!`);
     }

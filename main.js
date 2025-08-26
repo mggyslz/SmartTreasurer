@@ -1785,13 +1785,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (progressText) {
             progressText.textContent = updates.targetProgress;
             
+            // Remove any existing color classes
+            progressText.classList.remove('target-progress-complete');
+            
             // Set color based on achievement
             if (updates.targetAchieved) {
-                progressText.style.color = 'var(--success-color)';
-            } else if (updates.targetProgress.includes('%') && parseFloat(updates.targetProgress.match(/\(([\d.]+)%\)/)?.[1] || 0) >= 75) {
-                progressText.style.color = 'var(--warning-color)';
+                progressText.style.color = 'var(--success-color)'; // Green for completed
             } else {
-                progressText.style.color = 'var(--danger-color)';
+                progressText.style.color = 'var(--warning-color)'; // Orange
             }
         }
         

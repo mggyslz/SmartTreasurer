@@ -1388,18 +1388,22 @@ input:checked + .slider:before {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
     gap: var(--spacing-medium);
     margin-top: var(--spacing-medium);
-    height: auto; /* Let the height adapt */
-    overflow: auto; /* Scroll only if needed */
+    height: auto;
+    overflow: auto;
 }
 
 .section-chart-item {
     display: flex;
     flex-direction: column;
-    height: 100%; /* Take full height of grid cell */
+    height: 100%;
     padding: var(--spacing-medium);
     border-radius: var(--border-radius);
     background-color: var(--container-bg);
     box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: none;
 }
 
 .chart-wrapper {

@@ -750,7 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function login() {
         const username = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value;
-        loginError.style.display = 'none'; // Reset error
+        loginError.style.display = 'none';
 
         if (!username || !password) {
             showError(loginError, 'Please enter both username and password.');
@@ -758,14 +758,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-        const user = storedUsers.find(u => u.username === username && u.password === password);
+        const hashedPassword = CryptoJS.SHA256(password + username).toString();
+        const user = storedUsers.find(u => u.username === username && u.password === hashedPassword);
 
         if (user) {
             currentUser = user.username;
-            // Store current user in sessionStorage
             sessionStorage.setItem('currentUser', currentUser);
-            
-            // Load data specific to this user
             loadUserData();
             startApp();
         } else {
@@ -777,15 +775,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('signupUsername').value.trim();
         const password = document.getElementById('signupPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
-        signupError.style.display = 'none'; // Reset error
+        signupError.style.display = 'none';
 
         if (!username || !password || !confirmPassword) {
-             showError(signupError, 'Please fill in all fields.');
-             return;
+            showError(signupError, 'Please fill in all fields.');
+            return;
         }
-        if (password.length < 6) { // Example validation
-             showError(signupError, 'Password must be at least 6 characters long.');
-             return;
+        if (password.length < 6) {
+            showError(signupError, 'Password must be at least 6 characters long.');
+            return;
         }
         if (password !== confirmPassword) {
             showError(signupError, 'Passwords do not match.');
@@ -799,17 +797,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // In a real app: Hash the password before storing!
-        // For this example, storing plaintext (SECURITY RISK)
-        users.push({ username, password });
+        // Hash the password with CryptoJS
+        const hashedPassword = CryptoJS.SHA256(password + username).toString();
+
+        users.push({ username, password: hashedPassword });
         localStorage.setItem('users', JSON.stringify(users));
 
-        // Clear form and switch to login
         document.getElementById('signupUsername').value = '';
         document.getElementById('signupPassword').value = '';
         document.getElementById('confirmPassword').value = '';
         showLogin();
-        // Optional: Show a success message briefly
         alert('Sign up successful! Please log in.');
     }
 
@@ -824,26 +821,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let users = JSON.parse(localStorage.getItem('users') || []);
-        const userIndex = users.findIndex(u => u.username === username && u.password === password);
+        const hashedPassword = CryptoJS.SHA256(password + username).toString();
+        const userIndex = users.findIndex(u => u.username === username && u.password === hashedPassword);
 
         if (userIndex !== -1) {
-            // **CRITICAL**: Confirm deletion!
             if (confirm(`Are you absolutely sure you want to delete the account "${username}"? ALL associated student data will be permanently lost!`)) {
                 if(confirm(`FINAL WARNING: This cannot be undone. Delete account "${username}"?`)) {
-                    // Remove user from users list
                     users.splice(userIndex, 1);
                     localStorage.setItem('users', JSON.stringify(users));
 
-                    // Remove ALL associated data (both old and new formats)
                     localStorage.removeItem(`students_${username}`);
                     localStorage.removeItem(`smartTreasurerData_${username}`);
 
-                    // If the deleted account is currently logged in, clear everything and reset
                     if (currentUser === username) {
-                        // Clear session storage
                         sessionStorage.removeItem('currentUser');
-                        
-                        // Reset current user and app data
                         currentUser = null;
                         appData = {
                             students: [],
@@ -851,19 +842,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             activeCategory: null,
                             currentUser: null
                         };
-                        
-                        // Clear any displayed data immediately
                         updateDisplay();
-                        
-                        // Show opening screen again
                         openingScreen.style.display = 'flex';
                         openingScreen.style.opacity = '1';
                     }
 
-                    // Clear the login form
                     document.getElementById('loginUsername').value = '';
                     document.getElementById('loginPassword').value = '';
-
                     alert('Account and associated data successfully deleted.');
                 }
             }

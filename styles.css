@@ -838,6 +838,40 @@ i.fa-bounce { /* Ensure bounce animation works */
 [data-theme="dark"] .category-card h3 {
     color: var(--primary-light);
 }
+/* Ensure category form elements use theme variables */
+#categoryForm input,
+#categoryForm textarea,
+#categoryForm select {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+#categoryForm input:focus,
+#categoryForm textarea:focus,
+#categoryForm select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+}
+
+#categoryForm label {
+    color: var(--text-color);
+}
+
+/* Ensure all text elements use theme variables */
+.modal-content,
+.modal-content h2,
+.modal-content h3,
+.modal-content p {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-content h2,
+[data-theme="dark"] .modal-content h3,
+[data-theme="dark"] .modal-content p {
+    color: var(--text-color-dark);
+}
 
 /* Input fields styling */
 [data-theme="dark"] #categoryForm input,
@@ -2055,4 +2089,118 @@ canvas {
 @keyframes slideOut {
     from { transform: translateX(0); opacity: 1; }
     to { transform: translateX(100%); opacity: 0; }
+}
+
+/* Delete Section Modal Styles */
+#deleteSectionModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#deleteSectionModal .modal-content {
+    background-color: var(--container-bg);
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    color: var(--text-color);
+}
+
+#deleteSectionModal .close {
+    color: var(--text-muted);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    transition: color var(--transition-speed) ease;
+}
+
+#deleteSectionModal .close:hover {
+    color: var(--danger-color);
+}
+
+#deleteSectionModal h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+#deleteSectionModal select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+#deleteSectionModal .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Dark mode specific styles for delete modal */
+[data-theme="dark"] #deleteSectionModal .modal-content {
+    background-color: var(--container-bg-dark);
+    border: 1px solid var(--border-color-dark);
+}
+
+[data-theme="dark"] #deleteSectionModal select {
+    background-color: var(--bg-color-dark);
+    border-color: var(--border-color-dark);
+    color: var(--text-color-dark);
+}
+
+/* Add these CSS rules to ensure proper theming for search inputs */
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #a0a0a0 !important;
+  opacity: 1;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  color: #e0e0e0 !important;
+  background-color: #1e1e1e !important;
+}
+
+/* Ensure the search input specifically gets proper styling */
+[data-theme="dark"] #searchInput,
+[data-theme="dark"] #searchSection {
+  color: #e0e0e0 !important;
+  background-color: #1e1e1e !important;
+  border-color: #444;
+}
+
+[data-theme="dark"] #searchInput::placeholder {
+  color: #a0a0a0 !important;
+}
+
+/* Force light theme for login screen inputs */
+.opening-screen input,
+.opening-screen textarea,
+.opening-screen select {
+    color: #333333 !important;
+    background-color: #ffffff !important;
+    border-color: #ddd !important;
+}
+
+.opening-screen input::placeholder,
+.opening-screen textarea::placeholder {
+    color: #757575 !important;
 }

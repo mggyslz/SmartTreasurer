@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
             togglePaymentStatus, deleteStudent, 
             
             // Section management
-            deleteSectionPrompt, deleteSection, toggleSection,
+            showDeleteSectionModal, deleteSection, toggleSection,
             
             // Import/export
             importFromExcel: handleFileImport, exportToExcel,
@@ -418,6 +418,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Scroll to form
                 document.getElementById('categoryForm').scrollIntoView({ behavior: 'smooth' });
             },
+
+            hideDeleteSectionModal: function() {
+                const modal = document.getElementById('deleteSectionModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            },
+            
+            deleteSelectedSection: function() {
+                const sectionDropdown = document.getElementById('sectionToDelete');
+                const selectedSection = sectionDropdown.value;
+                
+                if (!selectedSection) {
+                    alert("Please select a section to delete.");
+                    return;
+                }
+                
+                window.hideDeleteSectionModal();
+                
+                if (!confirm(`Are you sure you want to delete all students in section ${selectedSection}? This cannot be undone.`)) return;
+                
+                const originalLength = appData.students.length;
+                appData.students = appData.students.filter(student => student.section !== selectedSection);
+                saveData();
+                
+                const deletedCount = originalLength - appData.students.length;
+                updateDisplay();
+                
+                if (deletedCount > 0) {
+                    showFeedback(`Deleted ${deletedCount} students from section ${selectedSection}.`);
+                } else {
+                    showFeedback(`No students found in section ${selectedSection}.`);
+                }
+            },
+
             deleteCategory: function(categoryId) {
                 if (!confirm('Are you sure you want to delete this category? This will remove all related transaction data.')) return;
                 
@@ -607,55 +642,87 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setTheme(theme) {
+        // Always use light theme for login screen regardless of preference
+        const isLoginScreen = !sessionStorage.getItem('currentUser');
+        const effectiveTheme = isLoginScreen ? 'light' : theme;
+        
         // Set the theme attribute on document element
-        document.documentElement.setAttribute('data-theme', theme);
-        // Save theme preference to localStorage
-        localStorage.setItem('theme', theme);
+        document.documentElement.setAttribute('data-theme', effectiveTheme);
+        
+        // Save theme preference to localStorage (only for logged-in users)
+        if (!isLoginScreen) {
+            localStorage.setItem('theme', theme);
+        }
+        
         // Update theme toggle checkbox state
-        themeToggle.checked = theme === 'dark';
+        themeToggle.checked = effectiveTheme === 'dark';
+        
         // Update theme label text and icon
-        themeLabel.innerHTML = `<i class="fas ${theme === 'dark' ? 'fa-moon' : 'fa-sun'}"></i> ${theme === 'dark' ? 'Dark' : 'Light'} Mode`;
-        // Apply theme-specific styles to form elements if user is logged in
-        if (sessionStorage.getItem('currentUser')) {
-            const inputs = document.querySelectorAll('input, textarea, select');
-            inputs.forEach(input => {
-                input.style.color = theme === 'dark' ? '#e0e0e0' : '#333333';
-                input.style.backgroundColor = theme === 'dark' ? '#1e1e1e' : '#ffffff';
-                
-                // Handle placeholders
-                if (theme === 'dark') {
-                    input.setAttribute('data-placeholder', input.getAttribute('placeholder') || '');
-                    input.setAttribute('placeholder', '');
-                } else {
-                    const originalPlaceholder = input.getAttribute('data-placeholder');
-                    if (originalPlaceholder) {
-                        input.setAttribute('placeholder', originalPlaceholder);
-                    }
-                }
-            });
+        themeLabel.innerHTML = `<i class="fas ${effectiveTheme === 'dark' ? 'fa-moon' : 'fa-sun'}"></i> ${effectiveTheme === 'dark' ? 'Dark' : 'Light'} Mode`;
+        
+        // Apply theme-specific styles to all form elements
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.style.color = effectiveTheme === 'dark' ? '#e0e0e0' : '#333333';
+            input.style.backgroundColor = effectiveTheme === 'dark' ? '#1e1e1e' : '#ffffff';
+            input.style.borderColor = effectiveTheme === 'dark' ? '#444' : '#ddd';
             
-            // Special handling for edit form which might be visible
-            const editForm = document.getElementById('editForm');
-            if (editForm && editForm.style.display !== 'none') {
-                // Ensure edit form uses proper theme colors
-                editForm.style.backgroundColor = theme === 'dark' ? 
-                    getComputedStyle(document.documentElement).getPropertyValue('--container-bg-dark') : 
-                    getComputedStyle(document.documentElement).getPropertyValue('--container-bg-light');
-                
-                editForm.style.color = theme === 'dark' ? 
-                    getComputedStyle(document.documentElement).getPropertyValue('--text-color-dark') : 
-                    getComputedStyle(document.documentElement).getPropertyValue('--text-color-light');
+            // Handle placeholders - ensure they're visible in both themes
+            if (effectiveTheme === 'dark') {
+                // Store original placeholder and set a data attribute
+                if (!input.hasAttribute('data-placeholder-original')) {
+                    input.setAttribute('data-placeholder-original', input.getAttribute('placeholder') || '');
+                }
+                // Use a darker placeholder color for dark mode
+                input.setAttribute('placeholder', input.getAttribute('data-placeholder-original') || '');
+            } else {
+                // Restore original placeholder
+                const originalPlaceholder = input.getAttribute('data-placeholder-original');
+                if (originalPlaceholder) {
+                    input.setAttribute('placeholder', originalPlaceholder);
+                }
             }
-        } 
-        // Force chart recreation when theme changes
-        if (appData.students.length > 0 && appData.activeCategory) {
+        });
+        
+        // Force light theme inputs on login screen
+        if (isLoginScreen) {
+            const loginInputs = document.querySelectorAll('.opening-screen input, .opening-screen textarea, .opening-screen select');
+            loginInputs.forEach(input => {
+                input.style.color = '#333333';
+                input.style.backgroundColor = '#ffffff';
+                input.style.borderColor = '#ddd';
+            });
+        }
+        
+        // Special handling for edit form which might be visible
+        const editForm = document.getElementById('editForm');
+        if (editForm && editForm.style.display !== 'none') {
+            // Ensure edit form uses proper theme colors
+            editForm.style.backgroundColor = effectiveTheme === 'dark' ? 
+                getComputedStyle(document.documentElement).getPropertyValue('--container-bg-dark') : 
+                getComputedStyle(document.documentElement).getPropertyValue('--container-bg-light');
+            
+            editForm.style.color = effectiveTheme === 'dark' ? 
+                getComputedStyle(document.documentElement).getPropertyValue('--text-color-dark') : 
+                getComputedStyle(document.documentElement).getPropertyValue('--text-color-light');
+        }
+        
+        // Force chart recreation when theme changes (only for logged-in users)
+        if (!isLoginScreen && appData.students.length > 0 && appData.activeCategory) {
             // Clear cache and recreate charts
             chartDataCache.pie = null;
             chartDataCache.bar = null;
-            createSummaryCharts();
+            previousState.pieData = null;
+            previousState.barData = null;
+            
+            // Use a small delay to ensure theme is fully applied
+            setTimeout(() => {
+                createSummaryCharts();
+            }, 100);
         }
+        
         // Dispatch a custom event for any other components that need to respond to theme changes
-        const themeChangeEvent = new CustomEvent('themeChanged', { detail: { theme } });
+        const themeChangeEvent = new CustomEvent('themeChanged', { detail: { theme: effectiveTheme } });
         document.dispatchEvent(themeChangeEvent);
     }
 
@@ -666,6 +733,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.toggle-btn.active')?.classList.remove('active');
         document.querySelector('.toggle-btn:first-child').classList.add('active');
         loginError.style.display = 'none'; // Hide errors on switch
+        
+        // Ensure login form is cleared
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginPassword').value = '';
     }
 
     function showSignup() {
@@ -803,25 +874,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function logout() {
         if (confirm("Are you sure you want to logout?")) {
-            // Reset to light theme
-            document.documentElement.setAttribute('data-theme', 'light');
-            localStorage.setItem('theme', 'light');
-            
-            // Force light styles on inputs immediately
-            const inputs = document.querySelectorAll('#loginForm input, #signupForm input');
-            inputs.forEach(input => {
-                input.style.color = '#333333';
-                input.style.backgroundColor = '#ffffff';
-            });
+            // Clear login form fields
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
             
             // Clear user data
             sessionStorage.removeItem('currentUser');
             currentUser = null;
             appData = { students: [], categories: [], activeCategory: null, currentUser: null };
             
+            // Force light theme for login screen
+            setTheme('light');
+            
+            // Clear any search results
+            if (document.getElementById('searchResults')) {
+                document.getElementById('searchResults').innerHTML = '';
+                document.getElementById('searchResults').classList.remove('show-results');
+            }
+            
+            // Reset search filters
+            if (document.getElementById('searchInput')) {
+                document.getElementById('searchInput').value = '';
+            }
+            if (document.getElementById('searchPaid')) {
+                document.getElementById('searchPaid').checked = true;
+            }
+            if (document.getElementById('searchUnpaid')) {
+                document.getElementById('searchUnpaid').checked = true;
+            }
+            if (document.getElementById('searchSection')) {
+                document.getElementById('searchSection').value = '';
+            }
+            
+            // Hide any open modals
+            hideAddStudentModal();
+            hideEditForm();
+            hideCategoryManagement();
+            hideSectionChartsModal();
+            if (document.getElementById('deleteSectionModal')) {
+                document.getElementById('deleteSectionModal').style.display = 'none';
+            }
+            
             // Show login screen
             openingScreen.style.display = 'flex';
             openingScreen.style.opacity = '1';
+            
+            // Show login form by default
+            showLogin();
         }
     }
 
@@ -2258,9 +2357,81 @@ document.addEventListener('DOMContentLoaded', () => {
         element.classList.toggle('collapsed');
     }
 
-    function deleteSectionPrompt(section) {
-        if (!confirm(`Are you sure you want to delete all students in section ${section}? This cannot be undone.`)) return;
-        deleteSection(section);
+    function createSectionDeleteModal() {
+        const modal = document.createElement('div');
+        modal.id = 'deleteSectionModal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <span class="close" onclick="hideDeleteSectionModal()">&times;</span>
+                <h2>Delete Section</h2>
+                <p>Select which section you want to delete:</p>
+                <select id="sectionToDelete" class="form-control">
+                    <option value="">-- Select Section --</option>
+                </select>
+                <div class="modal-actions">
+                    <button onclick="hideDeleteSectionModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="deleteSelectedSection()" class="btn btn-danger">Delete Section</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    // Add these functions to show/hide the modal
+    function showDeleteSectionModal() {
+        const modal = document.getElementById('deleteSectionModal');
+        if (!modal) {
+            createSectionDeleteModal();
+        }
+        
+        // Populate the dropdown with sections
+        const sectionDropdown = document.getElementById('sectionToDelete');
+        sectionDropdown.innerHTML = '<option value="">-- Select Section --</option>';
+        
+        const sections = [...new Set(appData.students.map(student => student.section))].sort();
+        sections.forEach(section => {
+            const option = document.createElement('option');
+            option.value = section;
+            option.textContent = section;
+            sectionDropdown.appendChild(option);
+        });
+        
+        document.getElementById('deleteSectionModal').style.display = 'block';
+    }
+
+    function hideDeleteSectionModal() {
+        const modal = document.getElementById('deleteSectionModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    function deleteSelectedSection() {
+        const sectionDropdown = document.getElementById('sectionToDelete');
+        const selectedSection = sectionDropdown.value;
+        
+        if (!selectedSection) {
+            alert("Please select a section to delete.");
+            return;
+        }
+        
+        hideDeleteSectionModal();
+        
+        if (!confirm(`Are you sure you want to delete all students in section ${selectedSection}? This cannot be undone.`)) return;
+        
+        const originalLength = appData.students.length;
+        appData.students = appData.students.filter(student => student.section !== selectedSection);
+        saveData();
+        
+        const deletedCount = originalLength - appData.students.length;
+        updateDisplay();
+        
+        if (deletedCount > 0) {
+            showFeedback(`Deleted ${deletedCount} students from section ${selectedSection}.`);
+        } else {
+            showFeedback(`No students found in section ${selectedSection}.`);
+        }
     }
 
     function deleteSection(section) {
@@ -3100,7 +3271,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateDebounceTimer = null;
         }, 100);
     }
-
 
     function showSectionCharts() {
         const modal = document.getElementById('sectionChartsModal');

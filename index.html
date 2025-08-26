@@ -9,8 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
-
-    <!-- Opening Authentication Screen -->
     <div class="opening-screen" id="openingScreen">
         <div class="opening-content">
             <div class="opening-icon"><i class="fas fa-sack-dollar fa-bounce"></i></div>
@@ -21,8 +19,6 @@
                 <button class="toggle-btn active" onclick="showLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
                 <button class="toggle-btn" onclick="showSignup()"><i class="fas fa-user-plus"></i> Sign Up</button>
             </div>
-
-            <!-- Login Form -->
             <div class="login-form" id="loginForm">
                 <div class="form-group">
                     <label for="loginUsername"><i class="fas fa-user"></i> Username</label>
@@ -36,8 +32,6 @@
                 <button class="start-btn" onclick="login()"><i class="fas fa-sign-in-alt"></i> Login</button>
                 <button class="delete-btn" onclick="deleteAccount()"><i class="fas fa-trash-alt"></i> Delete Account</button>
             </div>
-
-            <!-- Signup Form -->
             <div class="signup-form" id="signupForm" style="display: none;">
                 <div class="form-group">
                     <label for="signupUsername"><i class="fas fa-user-check"></i> Username</label>
@@ -56,9 +50,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Theme switch being hidden for now -->
-     <!-- NOTE: Remove this in the future including the dependencies in script.js -->
     <div class="theme-switch hidden">
         <span class="theme-label" id="themeLabel"><i class="fas fa-sun"></i> Light Mode</span>
         <label class="switch">
@@ -66,14 +57,10 @@
             <span class="slider"></span>
         </label>
     </div>
-
-    <!-- Main Container -->
     <div class="container">
         <header class="app-header">
             <h1><i class="fas fa-university"></i> SmartTreasurer Dashboard</h1>
         </header>
-
-        <!-- Summary Section -->
         <div class="summary-box card">
             <h2><i class="fas fa-chart-pie"></i> Overall Summary</h2>
             <div class="summary-grid">
@@ -81,7 +68,6 @@
                 <p><i class="fas fa-users"></i> Total Students: <strong id="totalStudents">0</strong></p>
                 <p><i class="fas fa-check-circle status-paid"></i> Total Paid: <strong id="totalPaid">0</strong></p>
                 <p><i class="fas fa-times-circle status-unpaid"></i> Total Unpaid: <strong id="totalUnpaid">0</strong></p>
-                <!-- Add this new line for target progress -->
                 <p><i class="fas fa-bullseye"></i> Target Progress: 
                     <strong id="targetProgress">₱0.00 / ₱0.00 (0%)</strong>
                     <span id="targetAchieved" style="display:none; margin-left:10px;">
@@ -90,14 +76,10 @@
                 </p>
             </div>
         </div>
-
         <div class="current-category" id="currentCategoryDisplay">
             <h2 id="currentCategoryName">No Category Selected</h2>
             <p id="currentCategoryDescription">Please select a category to view student payments</p>
         </div>
-
-
-        <!-- Charts Section -->
         <div class="charts-section card">
             <h2><i class="fas fa-chart-pie"></i> Payment Distribution</h2>
             <div class="charts-container">
@@ -109,16 +91,12 @@
                 </div>
             </div>
         </div>
-
-                <!-- Add Student / Bulk Add Modal -->
         <div id="addStudentModal" class="modal">
             <div class="modal-content card">
                 <div class="modal-header">
                     <h2 id="modalTitle"><i class="fas fa-user-plus"></i> Add New Student</h2>
                     <span class="close" onclick="hideAddStudentModal()">×</span>
                 </div>
-
-                <!-- Tab Switcher -->
                 <div class="modal-tabs">
                     <div class="tab active" onclick="switchTab('single')">
                         <i class="fas fa-user"></i> Single Add
@@ -127,8 +105,6 @@
                         <i class="fas fa-users"></i> Bulk Add
                     </div>
                 </div>
-
-                <!-- Single Add Form -->
                 <form id="studentForm" class="modal-form tab-content active">
                     <div class="form-row">
                         <div class="form-group">
@@ -140,17 +116,14 @@
                             <input type="text" id="middleInitial" placeholder="B" maxlength="1" />
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label for="lastName"><i class="fas fa-user"></i> Last Name</label>
                         <input type="text" id="lastName" required placeholder="e.g., Dela Cruz" />
                     </div>
-
                     <div class="form-group">
                         <label for="section"><i class="fas fa-users-rectangle"></i> Section</label>
                         <input type="text" id="section" required placeholder="e.g., BSCS-3A" />
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label for="amount"><i class="fas fa-coins"></i> Amount (₱)</label>
@@ -164,13 +137,10 @@
                             </select>
                         </div>
                     </div>
-
                     <button type="submit" class="btn btn-primary btn-block">
                         <i class="fas fa-plus-circle"></i> Add Student
                     </button>
                 </form>
-
-                <!-- Bulk Add Form -->
                 <form id="bulkAddForm" class="modal-form tab-content">
                     <div class="form-group">
                         <label for="bulkSection"><i class="fas fa-users-rectangle"></i> Section</label>
@@ -186,8 +156,6 @@
                 </form>
             </div>
         </div>
-
-        <!-- Edit Form -->
         <div id="editForm" class="edit-form card" style="display: none;">
             <div class="edit-form-header">
                 <h2><i class="fas fa-edit"></i> Edit Student</h2>
@@ -233,16 +201,13 @@
                         <input type="date" id="editPaymentDate" class="modern-input" />
                         <small class="form-hint">Leave blank for today</small>
                     </div>
-                </div>
-                
+                </div>  
                 <div class="edit-form-actions">
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
                     <button type="button" class="btn btn-secondary" onclick="hideEditForm()"><i class="fas fa-times"></i> Cancel</button>
                 </div>
             </form>
         </div>
-
-        <!-- Search -->
         <div class="search-container card">
             <div class="search-header">
                 <h2><i class="fas fa-search"></i> Search Students</h2>
@@ -265,14 +230,10 @@
             </div>
             <div id="searchResults" class="search-results"></div>
         </div>
-
-        <!-- Section Lists -->
         <h2 class="section-title"><i class="fas fa-list-ul"></i> Student Payments by Section</h2>
         <div id="sectionLists">
             <p id="noStudentsMessage" style="text-align: center; padding: 20px; color: var(--text-muted);">No student data available. Add students or import from Excel.</p>
         </div>
-
-        <!-- Section Summary Table -->
         <h2 class="section-title"><i class="fas fa-chart-bar"></i> Section Summary</h2>
         <div class="table-responsive card">
             <table class="modern-table">
@@ -292,13 +253,9 @@
             </table>
         </div>
     </div>
-
-    <!-- Footer -->
     <footer class="app-footer">
         <p>© 2023 SmartTreasurer. All rights reserved.</p>
     </footer>
-
-    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <button class="sidebar-toggle" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>
@@ -308,7 +265,6 @@
                 <h3><i class="fas fa-university"></i> Menu</h3>
             </div>
             <ul class="sidebar-menu">
-                <!-- Active Category Selector -->
                 <li>
                     <div class="form-group">
                         <label for="activeCategorySelect"><i class="fas fa-tag"></i> Active Category:</label>
@@ -317,15 +273,11 @@
                         </select>
                     </div>
                 </li>
-
-                <!-- Primary Action -->
                 <li>
                     <button onclick="showAddStudentModal()" class="btn btn-primary sidebar-btn">
                         <i class="fas fa-user-plus"></i> Add Student
                     </button>
                 </li>
-
-                <!-- Analytics & Tools -->
                 <li>
                     <button onclick="showSectionCharts()" class="btn btn-secondary sidebar-btn">
                         <i class="fas fa-chart-pie"></i> Charts
@@ -342,8 +294,6 @@
                         <i class="fas fa-file-export"></i> Export
                     </button>
                 </li>
-
-                <!-- Appearance & Settings -->
                 <li>
                     <button onclick="toggleThemeFromSidebar()" class="btn btn-secondary sidebar-btn">
                         <i class="fas fa-moon"></i> Theme
@@ -354,10 +304,8 @@
                         <i class="fas fa-layer-group"></i> Categories
                     </button>
                 </li>
-
-                <!-- Danger Zone -->
                 <li>
-                    <button onclick="deleteSectionPrompt()" class="btn btn-danger sidebar-btn">
+                    <button onclick="showDeleteSectionModal()" class="btn btn-danger sidebar-btn">
                         <i class="fas fa-trash-alt"></i> Delete Section
                     </button>
                 </li>
@@ -369,8 +317,6 @@
             </ul>
         </div>
     </div>
-
-    <!-- Section Charts Modal -->
     <div id="sectionChartsModal" class="modal">
         <div class="modal-content card">
             <span class="close" onclick="hideSectionChartsModal()">×</span>
@@ -378,14 +324,12 @@
             <div id="sectionChartsContainer" ></div>
         </div>
     </div>
-    <!-- Category Modal -->
     <div id="categoryManagementModal" class="modal">
         <div class="modal-content card">
             <span class="close" onclick="hideCategoryManagement()">×</span>
             <h2><i class="fas fa-layer-group"></i> Payment Categories</h2>
             
             <div class="categories-container" id="categoriesContainer">
-                <!-- Categories will be loaded here -->
             </div>
             
             <div class="card category-form">
@@ -408,8 +352,6 @@
             </div>
         </div>
     </div>
-
-
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="main.js" defer></script>

@@ -1,16 +1,16 @@
 /* --- Base & Variables --- */
 :root {
-    --primary-color: #4CAF50; /* Green */
+    --primary-color: #4CAF50;
     --primary-dark: #388E3C;
     --primary-light: #C8E6C9;
-    --secondary-color: #03A9F4; /* Blue */
+    --secondary-color: #03A9F4; 
     --secondary-dark: #0288D1;
-    --accent-color: #FFC107; /* Amber */
-    --danger-color: #F44336; /* Red */
+    --accent-color: #FFC107; 
+    --danger-color: #F44336; 
     --danger-dark: #D32F2F;
-    --warning-color: #FF9800; /* Orange */
-    --info-color: #2196F3;   /* Blue */
-    --success-color: #4CAF50; /* Green */
+    --warning-color: #FF9800;
+    --info-color: #2196F3;   
+    --success-color: #4CAF50;
 
     --bg-color-light: #f4f7f6;
     --container-bg-light: #ffffff;
@@ -26,7 +26,7 @@
     --text-color-dark: #e0e0e0;
     --text-muted-dark: #aaaaaa;
     --border-color-dark: #424242;
-    --header-bg-dark: #2c3e50; /* Dark Blue/Grey */
+    --header-bg-dark: #2c3e50; 
     --header-text-dark: #e0e0e0;
     --card-shadow-dark: 0 4px 12px rgba(0, 0, 0, 0.4);
 
@@ -71,12 +71,12 @@ body {
     line-height: 1.6;
     font-size: 16px;
     transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
-    padding-top: 80px; /* Space for fixed theme switch */
+    padding-top: 80px; 
 }
 
 h1, h2, h3 {
     margin-bottom: var(--spacing-medium);
-    color: var(--primary-dark); /* Use primary color for headings */
+    color: var(--primary-dark);
 }
 [data-theme="dark"] h1,
 [data-theme="dark"] h2,
@@ -88,7 +88,7 @@ h1, h2, h3 {
 i {
     margin-right: var(--spacing-small);
 }
-i.fa-bounce { /* Ensure bounce animation works */
+i.fa-bounce { 
      animation-duration: 1.5s;
 }
 
@@ -121,7 +121,7 @@ i.fa-bounce { /* Ensure bounce animation works */
     margin-top: var(--spacing-large);
     padding-bottom: var(--spacing-small);
     border-bottom: 2px solid var(--primary-color);
-    display: inline-block; /* Make border only as wide as text */
+    display: inline-block; 
 }
 
 .card {
@@ -145,11 +145,11 @@ i.fa-bounce { /* Ensure bounce animation works */
     text-transform: uppercase;
     letter-spacing: 0.5px;
     transition: all var(--transition-speed) ease;
-    display: inline-flex; /* Align icon and text */
+    display: inline-flex; 
     align-items: center;
     justify-content: center;
     gap: var(--spacing-small);
-    text-decoration: none; /* For label buttons */
+    text-decoration: none; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .btn:hover, .delete-btn:hover, .start-btn:hover, .toggle-btn:hover {
@@ -161,7 +161,6 @@ i.fa-bounce { /* Ensure bounce animation works */
     box-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
-/* Primary Button */
 .btn-primary {
     background-color: var(--primary-color);
     color: #ffffff;
@@ -170,7 +169,6 @@ i.fa-bounce { /* Ensure bounce animation works */
     background-color: var(--primary-dark);
 }
 
-/* Secondary Button */
 .btn-secondary {
     background-color: var(--secondary-color);
     color: #ffffff;
@@ -179,16 +177,15 @@ i.fa-bounce { /* Ensure bounce animation works */
     background-color: var(--secondary-dark);
 }
 
-/* Danger Button */
-.btn-danger, .delete-btn { /* Style delete-btn like danger */
+.btn-danger, .delete-btn { 
     background-color: var(--danger-color);
     color: #ffffff;
-    margin-top: var(--spacing-medium); /* Specific spacing for delete btn */
+    margin-top: var(--spacing-medium); 
 }
 .btn-danger:hover, .delete-btn:hover {
     background-color: var(--danger-dark);
 }
-.delete-btn { /* Make delete button full width in auth */
+.delete-btn { 
      width: 100%;
 }
 
@@ -203,13 +200,13 @@ i.fa-bounce { /* Ensure bounce animation works */
     margin-top: var(--spacing-medium);
 }
 .start-btn:hover {
-    background: linear-gradient(45deg, var(--primary-dark), #2E7D32); /* Slightly darker */
+    background: linear-gradient(45deg, var(--primary-dark), #2E7D32); 
 }
 
 /* Auth Toggle Buttons */
 .auth-toggle {
     display: flex;
-    justify-content: center; /* Center buttons */
+    justify-content: center;
     gap: var(--spacing-medium);
     margin-bottom: var(--spacing-large);
 }
@@ -217,29 +214,29 @@ i.fa-bounce { /* Ensure bounce animation works */
     background-color: transparent;
     color: var(--primary-color);
     border: 2px solid var(--primary-color);
-    padding: 10px 25px; /* Adjust padding */
+    padding: 10px 25px; 
     font-size: 1rem;
 }
 .toggle-btn.active {
     background-color: var(--primary-color);
     color: white;
-    transform: scale(1.05); /* Slightly bigger when active */
+    transform: scale(1.05); 
 }
-.toggle-btn:hover:not(.active) { /* Hover only when not active */
+.toggle-btn:hover:not(.active) { 
     background-color: var(--primary-light);
     color: var(--primary-dark);
 }
 
 /* Action buttons in tables */
 .modern-table .btn {
-    padding: 5px 10px; /* Smaller buttons in table */
+    padding: 5px 10px; 
     font-size: 0.85rem;
     margin-right: var(--spacing-small);
-    margin-bottom: 5px; /* Spacing if buttons wrap */
-    text-transform: none; /* Normal case for table actions */
+    margin-bottom: 5px; 
+    text-transform: none; 
     letter-spacing: normal;
 }
-.btn-close-inline { /* For closing edit form */
+.btn-close-inline { 
      background: none;
      border: none;
      color: var(--text-muted);
@@ -250,7 +247,7 @@ i.fa-bounce { /* Ensure bounce animation works */
 .btn-close-inline:hover {
      color: var(--danger-color);
 }
-.btn-block { /* Utility class for full width buttons */
+.btn-block {
     width: 100%;
     margin-top: var(--spacing-medium);
 }
@@ -274,7 +271,7 @@ i.fa-bounce { /* Ensure bounce animation works */
     padding: 10px 12px;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    background-color: var(--bg-color); /* Match body background */
+    background-color: var(--bg-color);
     color: var(--text-color);
     font-size: 1rem;
     transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
@@ -283,22 +280,21 @@ i.fa-bounce { /* Ensure bounce animation works */
 .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3); /* Focus ring */
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
 }
 .form-group select {
-    appearance: none; /* Custom select arrow */
+    appearance: none; 
     background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.4-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
     background-repeat: no-repeat;
     background-position: right 10px top 50%;
     background-size: 10px auto;
-    padding-right: 30px; /* Space for arrow */
+    padding-right: 30px; 
 }
 [data-theme="dark"] .form-group select {
-     background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cccccc%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.4-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* Lighter arrow for dark mode */
+     background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cccccc%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.4-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
 }
 
-.modern-input { /* Alias for consistency if needed */
-     /* Inherits styles from general input */
+.modern-input { 
 }
 
 .error-message {
@@ -306,13 +302,13 @@ i.fa-bounce { /* Ensure bounce animation works */
     margin: var(--spacing-small) 0 var(--spacing-medium) 0;
     font-size: 0.9rem;
     font-weight: 500;
-    display: flex; /* Align icon */
+    display: flex;
     align-items: center;
     gap: var(--spacing-small);
 }
 
 /* Auth Form Specific Styles */
-.auth-input { /* Specific styles for auth inputs if needed */
+.auth-input {
      padding: 12px 15px;
      font-size: 1rem;
 }
@@ -419,7 +415,6 @@ i.fa-bounce { /* Ensure bounce animation works */
     }
 }
 
-/* Enhanced form styling for dark mode support */
 .edit-form input::placeholder,
 .edit-form textarea::placeholder {
     color: var(--text-muted);
@@ -445,34 +440,32 @@ i.fa-bounce { /* Ensure bounce animation works */
     color: var(--text-muted-dark);
 }
 
-/* Ensure all buttons have proper transitions */
 .edit-form .btn {
     transition: all var(--transition-speed) ease;
 }
 
-/* Modal backdrop for dark mode */
 [data-theme="dark"] .modal {
     background-color: rgba(0, 0, 0, 0.7);
 }
 
 /* --- Tables --- */
 .table-responsive {
-    overflow-x: auto; /* Enable horizontal scrolling on small screens */
+    overflow-x: auto; 
     margin-top: var(--spacing-medium);
 }
 .modern-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: var(--container-bg); /* Table bg */
+    background-color: var(--container-bg);
     color: var(--text-color);
-    font-size: 0.95rem; /* Slightly smaller font in tables */
+    font-size: 0.95rem; 
 }
 .modern-table th,
 .modern-table td {
-    padding: 12px 15px; /* More padding */
+    padding: 12px 15px; 
     text-align: left;
     border-bottom: 1px solid var(--border-color);
-    vertical-align: middle; /* Better alignment */
+    vertical-align: middle;
 }
 .modern-table th {
     background-color: var(--header-bg);
@@ -482,17 +475,17 @@ i.fa-bounce { /* Ensure bounce animation works */
     letter-spacing: 0.5px;
 }
 [data-theme="dark"] .modern-table th {
-     background-color: #34495e; /* Slightly different dark header */
+     background-color: #34495e;
 }
 
 .modern-table tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.03); /* Subtle hover */
+    background-color: rgba(0, 0, 0, 0.03);
 }
 [data-theme="dark"] .modern-table tbody tr:hover {
-    background-color: rgba(255, 255, 255, 0.05); /* Subtle hover dark */
+    background-color: rgba(255, 255, 255, 0.05);
 }
-.modern-table td:last-child { /* Actions column */
-     white-space: nowrap; /* Prevent actions from wrapping too early */
+.modern-table td:last-child { 
+     white-space: nowrap;
 }
 
 /* Status Colors */
@@ -596,7 +589,7 @@ i.fa-bounce { /* Ensure bounce animation works */
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .summary-grid {
-        grid-template-columns: 1fr; /* Stack items on small screens */
+        grid-template-columns: 1fr; 
     }
 }
 
@@ -609,9 +602,9 @@ i.fa-bounce { /* Ensure bounce animation works */
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Darker overlay */
+    background-color: rgba(0, 0, 0, 0.6);
     overflow: auto;
-    padding: 50px 15px; /* Keep top spacing + side breathing room */
+    padding: 50px 15px; 
 }
 
 .modal-content {
@@ -692,7 +685,7 @@ i.fa-bounce { /* Ensure bounce animation works */
 }
 
 .modal-actions .btn {
-    width: auto; /* keep natural width */
+    width: auto; 
 }
 
 /* Tabs */
@@ -798,7 +791,7 @@ i.fa-bounce { /* Ensure bounce animation works */
 
 [data-theme="dark"] #addStudentModal .modal-content,
 [data-theme="dark"] #bulkAddForm {
-    color: var(--text-color-dark); /* White text from your variables */
+    color: var(--text-color-dark);
 }
 
 [data-theme="dark"] #addStudentModal label,
@@ -813,12 +806,12 @@ i.fa-bounce { /* Ensure bounce animation works */
 
 [data-theme="dark"] #addStudentModal h2,
 [data-theme="dark"] #bulkAddForm h2 {
-    color: var(--primary-light); /* Light green for headings */
+    color: var(--primary-light); 
 }
 
 /* Payment Categories (Dark Mode) */
 [data-theme="dark"] #categoryManagementModal .modal-content {
-    color: var(--text-color-dark); /* White text */
+    color: var(--text-color-dark); 
 }
 
 [data-theme="dark"] .category-form {
@@ -838,7 +831,6 @@ i.fa-bounce { /* Ensure bounce animation works */
 [data-theme="dark"] .category-card h3 {
     color: var(--primary-light);
 }
-/* Ensure category form elements use theme variables */
 #categoryForm input,
 #categoryForm textarea,
 #categoryForm select {
@@ -858,7 +850,6 @@ i.fa-bounce { /* Ensure bounce animation works */
     color: var(--text-color);
 }
 
-/* Ensure all text elements use theme variables */
 .modal-content,
 .modal-content h2,
 .modal-content h3,
@@ -873,7 +864,6 @@ i.fa-bounce { /* Ensure bounce animation works */
     color: var(--text-color-dark);
 }
 
-/* Input fields styling */
 [data-theme="dark"] #categoryForm input,
 [data-theme="dark"] #categoryForm textarea {
     background-color: var(--bg-color-dark);
@@ -885,7 +875,6 @@ i.fa-bounce { /* Ensure bounce animation works */
     color: var(--text-muted-dark);
 }
 
-/* Animation */
 @keyframes modalSlideIn {
     from {
         transform: translateY(-50px);
@@ -904,12 +893,12 @@ i.fa-bounce { /* Ensure bounce animation works */
     position: fixed;
     top: 15px;
     right: 20px;
-    z-index: 1001; /* Above container but below modal */
+    z-index: 1001; 
     display: flex;
     align-items: center;
-    background-color: var(--container-bg); /* Give it a background */
+    background-color: var(--container-bg); 
     padding: var(--spacing-small) var(--spacing-medium);
-    border-radius: 30px; /* Pill shape */
+    border-radius: 30px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     transition: background-color var(--transition-speed) ease;
 }
@@ -922,7 +911,7 @@ i.fa-bounce { /* Ensure bounce animation works */
 .switch {
     position: relative;
     display: inline-block;
-    width: 50px; /* Smaller switch */
+    width: 50px; 
     height: 28px;
 }
 .switch input {
@@ -956,7 +945,7 @@ input:checked + .slider {
     background-color: var(--primary-color);
 }
 input:checked + .slider:before {
-    transform: translateX(22px); /* Adjust translation */
+    transform: translateX(22px);
 }
 
 /* --- Opening Screen --- */
@@ -970,14 +959,14 @@ input:checked + .slider:before {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2000; /* Below modal */
+    z-index: 2000;
     transition: opacity 0.5s ease-in-out;
-    padding: var(--spacing-medium); /* Add padding for smaller screens */
+    padding: var(--spacing-medium); 
 }
 .opening-content {
     text-align: center;
-    padding: var(--spacing-large) var(--spacing-medium); /* Adjust padding */
-    background: var(--container-bg-light); /* Always light bg for contrast */
+    padding: var(--spacing-large) var(--spacing-medium); 
+    background: var(--container-bg-light); 
     border-radius: var(--border-radius);
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     max-width: 500px;
@@ -989,7 +978,6 @@ input:checked + .slider:before {
      to   { opacity: 1; transform: scale(1); }
 }
 
-/* Force light theme inputs on login screen */
 .opening-screen input,
 .opening-screen textarea,
 .opening-screen select {
@@ -999,13 +987,13 @@ input:checked + .slider:before {
 
 .opening-content h1 {
     color: var(--primary-dark);
-    margin-bottom: var(--spacing-small); /* Less margin */
-    font-size: 2rem; /* Adjust size */
+    margin-bottom: var(--spacing-small); 
+    font-size: 2rem; 
 }
 .opening-content p {
-    color: var(--text-muted-light); /* Always light text */
+    color: var(--text-muted-light); 
     margin-bottom: var(--spacing-large);
-    font-size: 1.1rem; /* Adjust size */
+    font-size: 1.1rem;
     font-weight: 400;
 }
 .opening-icon {
@@ -1013,20 +1001,20 @@ input:checked + .slider:before {
     color: var(--primary-color);
     margin-bottom: var(--spacing-medium);
 }
-.opening-icon .fa-bounce { /* Specific target for bounce */
-     display: inline-block; /* Needed for transform/animation */
+.opening-icon .fa-bounce { 
+     display: inline-block; 
 }
 
 /* --- File Operations --- */
 .file-operations {
     display: flex;
-    flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+    flex-wrap: wrap;
     gap: var(--spacing-medium);
     margin-bottom: var(--spacing-large);
     align-items: center;
 }
 .file-operations .btn {
-    margin-right: 0; /* Remove default margin since gap is used */
+    margin-right: 0;
 }
 
 /* --- Section Specific Styles --- */
@@ -1035,7 +1023,7 @@ input:checked + .slider:before {
     color: var(--header-text);
     padding: 10px 15px;
     margin-top: var(--spacing-large);
-    border-radius: var(--border-radius) var(--border-radius) 0 0; /* Top corners rounded */
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
     font-size: 1.1rem;
     font-weight: 600;
 }
@@ -1043,16 +1031,16 @@ input:checked + .slider:before {
      background-color: #34495e;
 }
 
-#sectionLists .card { /* Add card style to section tables */
+#sectionLists .card { 
      margin-top: var(--spacing-medium);
-     padding: 0; /* Remove padding, table has its own */
-     overflow: hidden; /* Clip table corners */
+     padding: 0; 
+     overflow: hidden; 
 }
-#sectionLists h3.section-header { /* Adjust header inside list */
+#sectionLists h3.section-header { 
      margin-top: 0;
      border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
-#sectionLists .table-responsive { /* Remove top margin for table inside card */
+#sectionLists .table-responsive { 
     margin-top: 0;
 }
 
@@ -1070,7 +1058,7 @@ input:checked + .slider:before {
 @media (max-width: 768px) {
     body {
         font-size: 15px;
-        padding-top: 70px; /* Adjust for smaller theme switch */
+        padding-top: 70px; 
     }
     .container {
         margin: var(--spacing-medium) auto;
@@ -1080,19 +1068,19 @@ input:checked + .slider:before {
         font-size: 1.8rem;
     }
     .summary-grid {
-        grid-template-columns: 1fr; /* Stack summary items */
+        grid-template-columns: 1fr; 
         gap: var(--spacing-small);
     }
     .file-operations {
-        flex-direction: column; /* Stack file buttons */
-        align-items: stretch; /* Make buttons full width */
+        flex-direction: column; 
+        align-items: stretch; 
     }
     .file-operations .btn {
         width: 100%;
     }
     .modern-table th,
     .modern-table td {
-        padding: 8px 10px; /* Less padding on smaller screens */
+        padding: 8px 10px; 
         font-size: 0.9rem;
     }
     .modern-table .btn {
@@ -1112,7 +1100,7 @@ input:checked + .slider:before {
         font-size: 1rem;
     }
     .auth-toggle {
-         flex-direction: column; /* Stack login/signup */
+         flex-direction: column; 
     }
     .toggle-btn {
          width: 100%;
@@ -1243,13 +1231,11 @@ input:checked + .slider:before {
     margin-bottom: 5px;
 }
 
-/* Adjust container when sidebar is open */
 .sidebar-open .container {
     margin-left: 250px;
     width: calc(100% - 250px);
 }
 
-/* Move theme switch down when sidebar is open */
 .sidebar-open .theme-switch {
     right: 20px;
     top: 70px;
@@ -1276,12 +1262,10 @@ input:checked + .slider:before {
     }
 }
 
-/* For the theme in main */
 .hidden {
     display: none !important;
 }
 
-/* Collapsible section headers */
 .section-header {
     cursor: pointer;
     position: relative;
@@ -1300,7 +1284,7 @@ input:checked + .slider:before {
 }
 
 .section-header.collapsed::after {
-    content: '\f054'; /* FontAwesome chevron-right */
+    content: '\f054';
     transform: translateY(-50%) rotate(0deg);
 }
 
@@ -1379,10 +1363,9 @@ input:checked + .slider:before {
 }
 
 [data-theme="dark"] .chart-card::before {
-    background: var(--secondary-color); /* Using your --secondary-color */
+    background: var(--secondary-color); 
 }
 
-/* Section Charts Modal */
 #sectionChartsContainer {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
@@ -1408,7 +1391,7 @@ input:checked + .slider:before {
 
 .chart-wrapper {
     flex: 1;
-    min-height: 0; /* Allow chart to shrink */
+    min-height: 0; 
 }
 
 .section-stats {
@@ -1480,7 +1463,7 @@ input:checked + .slider:before {
     background: var(--secondary-color);
 }
 #sectionChartsModal .modal-content {
-    max-width: 1000px; /* Wider modal */
+    max-width: 1000px; 
     width: 90%;
     padding: var(--spacing-large);
 }
@@ -1513,7 +1496,6 @@ input:checked + .slider:before {
     min-height: 200px;
 }
 
-/* Chart tooltip styling */
 .chartjs-tooltip {
     background: var(--container-bg) !important;
     border: 1px solid var(--border-color) !important;
@@ -1522,7 +1504,6 @@ input:checked + .slider:before {
     padding: 8px 12px !important;
 }
 
-/* Chart legend styling */
 .chart-legend {
     display: flex;
     flex-wrap: wrap;
@@ -1567,12 +1548,10 @@ input:checked + .slider:before {
     color: var(--text-muted);
 }
 
-/* Categories container */
 #categoriesContainer {
     margin-bottom: var(--spacing-large);
 }
 
-/* Category card */
 .category-card {
     background-color: var(--container-bg);
     border-radius: var(--border-radius);
@@ -1639,7 +1618,6 @@ input:checked + .slider:before {
     color: var(--text-muted);
 }
 
-/* Category form */
 .category-form {
     background-color: var(--container-bg);
     border-radius: var(--border-radius);
@@ -1681,7 +1659,7 @@ input:checked + .slider:before {
 }
 
 [data-theme="dark"] #categoryManagementModal .modal-content h2 {
-    color: var(--primary-light); /* Light green */
+    color: var(--primary-light);
 }
 
 [data-theme="dark"] .category-card {
@@ -1700,7 +1678,7 @@ input:checked + .slider:before {
 }
 
 [data-theme="dark"] .category-card h3 {
-    color: var(--primary-light); /* Light green */
+    color: var(--primary-light); 
 }
 
 
@@ -1714,7 +1692,6 @@ input:checked + .slider:before {
     }
 }
 
-/*Category Styles*/
 .current-category {
     background: linear-gradient(
         135deg, 
@@ -1801,7 +1778,7 @@ input:checked + .slider:before {
 [data-theme="dark"] .current-category {
     background: linear-gradient(
         135deg, 
-        rgba(44, 62, 80, 0.9), /* Using your --header-bg-dark color */
+        rgba(44, 62, 80, 0.9),
         rgba(30, 64, 175, 0.9)
     );
     border: 1px solid var(--border-color-dark);
@@ -1815,14 +1792,12 @@ input:checked + .slider:before {
     );
 }
 
-/* Add responsive styles */
 @media (max-width: 768px) {
     .categories-container {
         grid-template-columns: 1fr;
     }
 }
 
-/* Target Progress Styles */
 #targetProgress {
     font-weight: bold;
     transition: color 0.3s ease;
@@ -1855,14 +1830,12 @@ input:checked + .slider:before {
     height: 300px; 
 }
 
-/* Ensure canvas elements have proper dimensions */
 canvas {
     display: block; 
     width: 100% !important;
     height: 100% !important;
 }
 
-/* --- Modern Search Component --- */
 .search-container {
     background-color: var(--container-bg);
     border-radius: var(--border-radius);
@@ -2007,7 +1980,7 @@ canvas {
 }
 
 [data-theme="dark"] .search-header h2 {
-    color: var(--primary-light); /* Light green (#C8E6C9) */
+    color: var(--primary-light); 
 }
 
 [data-theme="dark"] .search-input {
@@ -2024,7 +1997,6 @@ canvas {
     color: var(--text-color-dark);
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .search-input-container {
         flex-direction: column;
@@ -2049,7 +2021,6 @@ canvas {
     }
 }
 
-/* Show Feedback */
 .toast-container {
     position: fixed;
     top: 20px;
@@ -2095,7 +2066,6 @@ canvas {
     to { transform: translateX(100%); opacity: 0; }
 }
 
-/* Delete Section Modal Styles */
 #deleteSectionModal {
     display: none;
     position: fixed;
@@ -2157,7 +2127,6 @@ canvas {
     gap: 10px;
 }
 
-/* Dark mode specific styles for delete modal */
 [data-theme="dark"] #deleteSectionModal .modal-content {
     background-color: var(--container-bg-dark);
     border: 1px solid var(--border-color-dark);
@@ -2169,7 +2138,6 @@ canvas {
     color: var(--text-color-dark);
 }
 
-/* Add these CSS rules to ensure proper theming for search inputs */
 [data-theme="dark"] input::placeholder,
 [data-theme="dark"] textarea::placeholder {
   color: #a0a0a0 !important;
@@ -2183,7 +2151,6 @@ canvas {
   background-color: #1e1e1e !important;
 }
 
-/* Ensure the search input specifically gets proper styling */
 [data-theme="dark"] #searchInput,
 [data-theme="dark"] #searchSection {
   color: #e0e0e0 !important;
@@ -2195,7 +2162,6 @@ canvas {
   color: #a0a0a0 !important;
 }
 
-/* Force light theme for login screen inputs */
 .opening-screen input,
 .opening-screen textarea,
 .opening-screen select {
